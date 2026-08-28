@@ -9,3 +9,5 @@ flowforge_add_test(NAME serialization_test SOURCES serialization_test.cpp LABELS
 flowforge_add_test(NAME validation_test SOURCES validation_test.cpp LABELS unit)
 flowforge_add_test(NAME storage_test SOURCES storage_test.cpp LABELS unit)
 flowforge_add_test(NAME cache_test SOURCES cache_test.cpp LABELS unit)
+flowforge_add_test(NAME ready_queue_test SOURCES ready_queue_test.cpp LABELS unit)
+flowforge_add_test(NAME scheduler_test SOURCES scheduler_test.cpp LABELS unit)

@@ -42,7 +42,11 @@ add_library(flowforge_core STATIC
     storage/repositories.cpp
 
     cache/cache_key.cpp
-    cache/cache_store.cpp)
+    cache/cache_store.cpp
+
+    scheduler/scheduling_policy.cpp
+    scheduler/ready_queue.cpp
+    scheduler/scheduler.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
