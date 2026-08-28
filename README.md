@@ -13,6 +13,9 @@ tasks, attempts and captured logs — is persisted to SQLite.
 > **Status: 0.1.0.** Builds cleanly from a fresh checkout; 140 tests pass
 > (`ctest`), also under ASan/UBSan. Developed and tested on macOS (arm64);
 > Linux is expected to work and is in CI. Windows is not supported yet.
+>
+> **New here?** The [**user guide**](docs/user-guide.md) walks a macOS user
+> through install → writing the JSON → running and inspecting a pipeline.
 
 ```
 $ flowforge run pipeline.json
@@ -277,6 +280,7 @@ versioning · remote/distributed workers · resume of interrupted runs.
 
 | Doc | |
 | --- | --- |
+| [`user-guide.md`](docs/user-guide.md) | **start here** — install on macOS, write JSON, run, inspect, recipes, troubleshooting |
 | [`architecture.md`](docs/architecture.md) | layers, modules, invariants, threading |
 | [`scheduler.md`](docs/scheduler.md) | the scheduling algorithm in detail |
 | [`execution-model.md`](docs/execution-model.md) | exact state/transition/failure semantics |
