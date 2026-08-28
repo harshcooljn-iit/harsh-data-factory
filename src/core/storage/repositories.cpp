@@ -355,6 +355,12 @@ void CacheRepository::touch(const std::string& cache_key, std::int64_t now) {
     s.run();
 }
 
+void CacheRepository::remove(const std::string& cache_key) {
+    auto s = db_.prepare("DELETE FROM cache_entries WHERE cache_key = ?;");
+    s.bind(1, cache_key);
+    s.run();
+}
+
 int CacheRepository::clear_all() {
     db_.exec("DELETE FROM cache_entries;");
     return db_.changes();

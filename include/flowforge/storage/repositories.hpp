@@ -164,6 +164,7 @@ class CacheRepository {
     void store(const std::string& cache_key, const std::string& task_id, int exit_code,
                const std::string& outputs_json, std::int64_t now);
     void touch(const std::string& cache_key, std::int64_t now);
+    void remove(const std::string& cache_key);
     int clear_all();
     int prune_older_than(std::int64_t cutoff_ts);
     std::int64_t count();

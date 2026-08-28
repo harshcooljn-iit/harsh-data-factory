@@ -39,7 +39,10 @@ add_library(flowforge_core STATIC
 
     storage/database.cpp
     storage/schema.cpp
-    storage/repositories.cpp)
+    storage/repositories.cpp
+
+    cache/cache_key.cpp
+    cache/cache_store.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
