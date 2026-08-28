@@ -35,7 +35,11 @@ add_library(flowforge_core STATIC
 
     validation/pipeline_validator.cpp
 
-    serialization/pipeline_document.cpp)
+    serialization/pipeline_document.cpp
+
+    storage/database.cpp
+    storage/schema.cpp
+    storage/repositories.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
