@@ -91,6 +91,10 @@ jobs:
   format:
     name: clang-format
     runs-on: ubuntu-latest
+    # Informational: clang-format output drifts slightly between major
+    # versions, so a version mismatch with the developer's local tool should
+    # not block a PR. scripts/format.sh is the source of truth.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-format

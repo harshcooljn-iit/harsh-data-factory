@@ -141,7 +141,7 @@ export VCPKG_ROOT=/path/to/vcpkg          # required by the presets
 
 cmake --preset debug                       # configure (Ninja + vcpkg toolchain)
 cmake --build --preset debug               # core lib, CLI, tests, example helpers
-ctest --preset debug                       # 136 unit + integration tests
+ctest --preset debug                       # 140 tests (unit + integration + perf)
 ctest --preset debug -L unit               # fast lane only
 
 ./build/debug/bin/flowforge version
