@@ -1,3 +1,5 @@
 flowforge_add_test(NAME util_test SOURCES util_test.cpp LABELS unit)
 flowforge_add_test(NAME domain_test SOURCES domain_test.cpp LABELS unit)
 flowforge_add_test(NAME dag_test SOURCES dag_test.cpp LABELS unit)
+flowforge_add_test(NAME sha256_test SOURCES sha256_test.cpp LABELS unit)
+flowforge_add_test(NAME process_spec_test SOURCES process_spec_test.cpp LABELS unit)

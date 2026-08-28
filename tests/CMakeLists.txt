@@ -33,3 +33,4 @@ function(flowforge_add_test)
 endfunction()
 
 add_subdirectory(unit)
+add_subdirectory(integration)

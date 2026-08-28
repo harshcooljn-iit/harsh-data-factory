@@ -14,6 +14,7 @@ configure_file(
 add_library(flowforge_core STATIC
     util/string_utils.cpp
     util/time_utils.cpp
+    util/sha256.cpp
 
     domain/enums.cpp
     domain/retry_policy.cpp
@@ -22,7 +23,10 @@ add_library(flowforge_core STATIC
     domain/pipeline_definition.cpp
     domain/run_state.cpp
 
-    dag/dag.cpp)
+    dag/dag.cpp
+
+    process/process_spec.cpp
+    process/posix_process_runner.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
