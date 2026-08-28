@@ -26,7 +26,12 @@ add_library(flowforge_core STATIC
     dag/dag.cpp
 
     process/process_spec.cpp
-    process/posix_process_runner.cpp)
+    process/posix_process_runner.cpp
+
+    resources/resource_pool.cpp
+
+    artifacts/artifact.cpp
+    artifacts/artifact_manager.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
