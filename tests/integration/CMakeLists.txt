@@ -6,3 +6,8 @@ flowforge_add_test(NAME process_runner_test
     SOURCES process_runner_test.cpp
     LABELS integration)
 add_dependencies(process_runner_test flowforge_helpers)
+
+flowforge_add_test(NAME engine_test
+    SOURCES engine_test.cpp
+    LABELS integration)
+add_dependencies(engine_test flowforge_helpers)

@@ -46,7 +46,11 @@ add_library(flowforge_core STATIC
 
     scheduler/scheduling_policy.cpp
     scheduler/ready_queue.cpp
-    scheduler/scheduler.cpp)
+    scheduler/scheduler.cpp
+
+    engine/config.cpp
+    engine/ascii_graph.cpp
+    engine/engine.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
