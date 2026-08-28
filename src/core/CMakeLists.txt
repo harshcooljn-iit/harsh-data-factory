@@ -20,7 +20,9 @@ add_library(flowforge_core STATIC
     domain/resource_requirements.cpp
     domain/task_definition.cpp
     domain/pipeline_definition.cpp
-    domain/run_state.cpp)
+    domain/run_state.cpp
+
+    dag/dag.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
