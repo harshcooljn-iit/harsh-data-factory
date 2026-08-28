@@ -61,7 +61,7 @@ void set_nonblock_cloexec(int fd) {
 // Impl
 // ===========================================================================
 class PosixProcessRunner::Impl {
-  public:
+public:
     explicit Impl(Options options) : options_(options) {
         int fds[2] = {-1, -1};
         if (::pipe(fds) != 0) {
@@ -124,7 +124,7 @@ class PosixProcessRunner::Impl {
 
     std::size_t active_count() const { return active_.load(std::memory_order_relaxed); }
 
-  private:
+private:
     struct Command {
         enum class Type { kLaunch, kTerminate, kShutdown };
         Type type = Type::kShutdown;
@@ -237,8 +237,8 @@ class PosixProcessRunner::Impl {
         int exec_fds[2] = {-1, -1};
         if (::pipe(out_fds) != 0 || ::pipe(err_fds) != 0 || ::pipe(exec_fds) != 0) {
             const std::string msg = std::string("pipe(): ") + std::strerror(errno);
-            for (int fd : {out_fds[0], out_fds[1], err_fds[0], err_fds[1], exec_fds[0],
-                           exec_fds[1]}) {
+            for (int fd :
+                 {out_fds[0], out_fds[1], err_fds[0], err_fds[1], exec_fds[0], exec_fds[1]}) {
                 if (fd >= 0) {
                     ::close(fd);
                 }
@@ -265,8 +265,8 @@ class PosixProcessRunner::Impl {
         }
         argv.push_back(nullptr);
 
-        std::vector<std::string> env_storage = build_environment_block(
-            cmd.spec.environment, cmd.spec.inherit_environment);
+        std::vector<std::string> env_storage =
+            build_environment_block(cmd.spec.environment, cmd.spec.inherit_environment);
         std::vector<char*> envp;
         envp.reserve(env_storage.size() + 1);
         for (auto& e : env_storage) {
@@ -280,8 +280,8 @@ class PosixProcessRunner::Impl {
         const ::pid_t pid = ::fork();
         if (pid < 0) {
             const std::string msg = std::string("fork(): ") + std::strerror(errno);
-            for (int fd : {out_fds[0], out_fds[1], err_fds[0], err_fds[1], exec_fds[0],
-                           exec_fds[1]}) {
+            for (int fd :
+                 {out_fds[0], out_fds[1], err_fds[0], err_fds[1], exec_fds[0], exec_fds[1]}) {
                 ::close(fd);
             }
             report_spawn_failure(cmd, msg);
@@ -335,8 +335,7 @@ class PosixProcessRunner::Impl {
             ::close(out_fds[0]);
             ::close(err_fds[0]);
             std::string what = std::strerror(exec_errno);
-            report_spawn_failure(
-                cmd, "could not start '" + program + "': " + what);
+            report_spawn_failure(cmd, "could not start '" + program + "': " + what);
             return;
         }
 
@@ -373,7 +372,8 @@ class PosixProcessRunner::Impl {
             as_cancellation ? ProcessOutcome::kCancelled : ProcessOutcome::kTimedOut;
     }
 
-    void emit_lines(std::string& partial, std::string_view chunk,
+    void emit_lines(std::string& partial,
+                    std::string_view chunk,
                     const std::function<void(std::string_view)>& sink) {
         partial.append(chunk);
         std::size_t start = 0;
@@ -401,7 +401,8 @@ class PosixProcessRunner::Impl {
     }
 
     // Returns false when the fd hit EOF (and was closed).
-    bool drain_fd(int& fd, std::string& partial,
+    bool drain_fd(int& fd,
+                  std::string& partial,
                   const std::function<void(std::string_view)>& sink) {
         std::array<char, kReadChunk> buf{};
         while (true) {
@@ -436,7 +437,7 @@ class PosixProcessRunner::Impl {
 
     void poll_once() {
         std::vector<::pollfd> pfds;
-        std::vector<ProcessHandle> owners;   // parallel: which child, or 0 for wakeup
+        std::vector<ProcessHandle> owners;  // parallel: which child, or 0 for wakeup
         std::vector<bool> is_stdout;
 
         pfds.push_back(make_pollfd(wakeup_read_));
@@ -505,8 +506,8 @@ class PosixProcessRunner::Impl {
         if (!earliest) {
             return -1;
         }
-        const auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(*earliest - now)
-                               .count();
+        const auto delta =
+            std::chrono::duration_cast<std::chrono::milliseconds>(*earliest - now).count();
         if (delta <= 0) {
             return 0;
         }
@@ -626,8 +627,7 @@ PosixProcessRunner::PosixProcessRunner(Options options)
 
 PosixProcessRunner::~PosixProcessRunner() = default;
 
-ProcessHandle PosixProcessRunner::launch(const ProcessSpec& spec,
-                                         ProcessCallbacks callbacks) {
+ProcessHandle PosixProcessRunner::launch(const ProcessSpec& spec, ProcessCallbacks callbacks) {
     return impl_->launch(spec, std::move(callbacks));
 }
 
@@ -635,12 +635,16 @@ void PosixProcessRunner::request_terminate(ProcessHandle handle, bool as_cancell
     impl_->request_terminate(handle, as_cancellation);
 }
 
-std::size_t PosixProcessRunner::active_count() const { return impl_->active_count(); }
+std::size_t PosixProcessRunner::active_count() const {
+    return impl_->active_count();
+}
 
 // ===========================================================================
 // run_blocking
 // ===========================================================================
-ProcessResult run_blocking(ProcessRunner& runner, const ProcessSpec& spec, std::string* out,
+ProcessResult run_blocking(ProcessRunner& runner,
+                           const ProcessSpec& spec,
+                           std::string* out,
                            std::string* err) {
     std::mutex m;
     std::condition_variable cv;

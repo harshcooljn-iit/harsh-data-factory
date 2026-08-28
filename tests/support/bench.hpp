@@ -12,7 +12,8 @@ namespace flowforge::test {
 // Minimal benchmark helper: runs `body` `iterations` times, prints the median
 // and total wall time, and returns the median in milliseconds. No statistical
 // pretence -- just enough to record honest ballpark numbers.
-inline double bench(const std::string& name, int iterations,
+inline double bench(const std::string& name,
+                    int iterations,
                     const std::function<void()>& body) {
     std::vector<double> samples;
     samples.reserve(static_cast<std::size_t>(iterations));

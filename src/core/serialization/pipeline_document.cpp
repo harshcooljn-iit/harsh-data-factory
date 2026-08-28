@@ -25,8 +25,8 @@ struct Ctx {
 
 // --- typed field accessors -------------------------------------------------
 
-std::optional<std::string> as_string(const json& parent, const char* key,
-                                     const std::string& loc, Ctx& ctx, bool required) {
+std::optional<std::string> as_string(
+    const json& parent, const char* key, const std::string& loc, Ctx& ctx, bool required) {
     if (!parent.contains(key) || parent.at(key).is_null()) {
         if (required) {
             ctx.add(loc + "." + key, "required string field is missing");
@@ -41,7 +41,9 @@ std::optional<std::string> as_string(const json& parent, const char* key,
     return v.get<std::string>();
 }
 
-std::optional<std::int64_t> as_int(const json& parent, const char* key, const std::string& loc,
+std::optional<std::int64_t> as_int(const json& parent,
+                                   const char* key,
+                                   const std::string& loc,
                                    Ctx& ctx) {
     if (!parent.contains(key) || parent.at(key).is_null()) {
         return std::nullopt;
@@ -54,7 +56,9 @@ std::optional<std::int64_t> as_int(const json& parent, const char* key, const st
     return v.get<std::int64_t>();
 }
 
-std::optional<double> as_double(const json& parent, const char* key, const std::string& loc,
+std::optional<double> as_double(const json& parent,
+                                const char* key,
+                                const std::string& loc,
                                 Ctx& ctx) {
     if (!parent.contains(key) || parent.at(key).is_null()) {
         return std::nullopt;
@@ -67,7 +71,9 @@ std::optional<double> as_double(const json& parent, const char* key, const std::
     return v.get<double>();
 }
 
-std::optional<bool> as_bool(const json& parent, const char* key, const std::string& loc,
+std::optional<bool> as_bool(const json& parent,
+                            const char* key,
+                            const std::string& loc,
                             Ctx& ctx) {
     if (!parent.contains(key) || parent.at(key).is_null()) {
         return std::nullopt;
@@ -80,8 +86,10 @@ std::optional<bool> as_bool(const json& parent, const char* key, const std::stri
     return v.get<bool>();
 }
 
-std::vector<std::string> as_string_array(const json& parent, const char* key,
-                                         const std::string& loc, Ctx& ctx) {
+std::vector<std::string> as_string_array(const json& parent,
+                                         const char* key,
+                                         const std::string& loc,
+                                         Ctx& ctx) {
     std::vector<std::string> out;
     if (!parent.contains(key) || parent.at(key).is_null()) {
         return out;
@@ -101,7 +109,9 @@ std::vector<std::string> as_string_array(const json& parent, const char* key,
     return out;
 }
 
-RetryPolicy parse_retry(const json& parent, const RetryPolicy& base, const std::string& loc,
+RetryPolicy parse_retry(const json& parent,
+                        const RetryPolicy& base,
+                        const std::string& loc,
                         Ctx& ctx) {
     RetryPolicy p = base;
     if (!parent.contains("retry")) {
@@ -128,8 +138,10 @@ RetryPolicy parse_retry(const json& parent, const RetryPolicy& base, const std::
     return p;
 }
 
-ResourceRequirements parse_resources(const json& parent, const ResourceRequirements& base,
-                                     const std::string& loc, Ctx& ctx) {
+ResourceRequirements parse_resources(const json& parent,
+                                     const ResourceRequirements& base,
+                                     const std::string& loc,
+                                     Ctx& ctx) {
     ResourceRequirements req = base;
     if (!parent.contains("resources")) {
         return req;
@@ -152,8 +164,10 @@ ResourceRequirements parse_resources(const json& parent, const ResourceRequireme
     return req;
 }
 
-std::vector<ArtifactDecl> parse_artifacts(const json& parent, const char* key,
-                                          const std::string& loc, Ctx& ctx) {
+std::vector<ArtifactDecl> parse_artifacts(const json& parent,
+                                          const char* key,
+                                          const std::string& loc,
+                                          Ctx& ctx) {
     std::vector<ArtifactDecl> out;
     if (!parent.contains(key) || parent.at(key).is_null()) {
         return out;
@@ -169,8 +183,8 @@ std::vector<ArtifactDecl> parse_artifacts(const json& parent, const char* key,
         if (item.is_string()) {
             const std::string path = item.get<std::string>();
             const auto slash = path.find_last_of("/\\");
-            out.push_back({slash == std::string::npos ? path : path.substr(slash + 1), path,
-                           false});
+            out.push_back(
+                {slash == std::string::npos ? path : path.substr(slash + 1), path, false});
             continue;
         }
         if (!item.is_object()) {
@@ -411,9 +425,8 @@ json retry_to_json(const RetryPolicy& p) {
 }
 
 json resources_to_json(const ResourceRequirements& r) {
-    return json{{"cpu_cores", r.cpu_cores},
-                {"memory_mb", r.memory_mb},
-                {"gpu_count", r.gpu_count}};
+    return json{
+        {"cpu_cores", r.cpu_cores}, {"memory_mb", r.memory_mb}, {"gpu_count", r.gpu_count}};
 }
 
 json artifacts_to_json(const std::vector<ArtifactDecl>& decls) {

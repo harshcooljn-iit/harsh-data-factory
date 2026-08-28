@@ -18,7 +18,7 @@ namespace flowforge::scheduler {
 // without losing the ordering. Selective removal supports cancellation.
 // ---------------------------------------------------------------------------
 class ReadyQueue {
-  public:
+public:
     explicit ReadyQueue(const SchedulingPolicy& policy) : policy_(&policy) {}
 
     void push(ReadyEntry entry);
@@ -40,7 +40,7 @@ class ReadyQueue {
     /// Drain every entry, invoking @p fn on each (used to cancel all pending).
     void drain(const std::function<void(const ReadyEntry&)>& fn);
 
-  private:
+private:
     const SchedulingPolicy* policy_;
     std::vector<ReadyEntry> entries_;  // sorted best-first
 };

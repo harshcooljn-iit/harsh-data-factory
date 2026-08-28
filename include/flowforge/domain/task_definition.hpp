@@ -40,8 +40,8 @@ struct TaskDefinition {
     std::string script;
     std::vector<std::string> arguments;
 
-    std::vector<EnvVar> environment;   // ordered, applied on top of inherited env
-    std::string working_directory;     // relative to pipeline base dir, or absolute
+    std::vector<EnvVar> environment;  // ordered, applied on top of inherited env
+    std::string working_directory;    // relative to pipeline base dir, or absolute
 
     std::vector<ArtifactDecl> inputs;
     std::vector<ArtifactDecl> outputs;
@@ -49,7 +49,7 @@ struct TaskDefinition {
     RetryPolicy retry{};
     ResourceRequirements resources{};
     std::optional<std::chrono::milliseconds> timeout;
-    int priority = 0;                  // higher runs first among ready tasks
+    int priority = 0;  // higher runs first among ready tasks
     bool cache_enabled = true;
 
     /// Resolve program + argv. For python: {interpreter, [interpreter, script, args...]}.

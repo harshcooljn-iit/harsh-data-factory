@@ -37,7 +37,7 @@ struct FakeRun {
 // makes an in-flight job finish early as cancelled/timed-out.
 // ---------------------------------------------------------------------------
 class FakeProcessRunner final : public process::ProcessRunner {
-  public:
+public:
     using Behavior = std::function<FakeRun(const process::ProcessSpec&)>;
 
     explicit FakeProcessRunner(Behavior behavior) : behavior_(std::move(behavior)) {
@@ -93,7 +93,7 @@ class FakeProcessRunner final : public process::ProcessRunner {
         return max_concurrent_;
     }
 
-  private:
+private:
     struct Job {
         process::ProcessHandle handle;
         process::ProcessSpec spec;
@@ -181,9 +181,8 @@ class FakeProcessRunner final : public process::ProcessRunner {
             result.outcome = process::ProcessOutcome::kExited;
             result.exit_code = script.exit_code;
         }
-        result.duration =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now() - start);
+        result.duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - start);
 
         if (job.callbacks.on_exit) {
             job.callbacks.on_exit(result);

@@ -46,7 +46,7 @@ struct DagError {
 struct DagBuildResult;
 
 class Dag {
-  public:
+public:
     using BuildResult = DagBuildResult;
 
     // An incomplete return type is fine in a declaration; the definition of
@@ -89,7 +89,7 @@ class Dag {
     /// All transitive dependents of @p id (everything downstream). Insertion order.
     [[nodiscard]] std::vector<std::string> transitive_dependents(std::string_view id) const;
 
-  private:
+private:
     Dag() = default;
 
     std::unordered_map<std::string, std::size_t> index_;

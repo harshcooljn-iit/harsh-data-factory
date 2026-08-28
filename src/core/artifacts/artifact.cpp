@@ -25,7 +25,8 @@ std::string Artifact::identity() const {
 }
 
 Artifact probe_artifact(const std::string& logical_name,
-                        const std::filesystem::path& absolute_path, bool want_checksum) {
+                        const std::filesystem::path& absolute_path,
+                        bool want_checksum) {
     Artifact art;
     art.logical_name = logical_name;
     art.path = absolute_path;
@@ -48,9 +49,9 @@ Artifact probe_artifact(const std::string& logical_name,
         // file_clock's epoch is unspecified; file_clock::to_sys() is the
         // standard, portable bridge to system_clock (Unix epoch).
         const auto sys_time = std::chrono::file_clock::to_sys(mtime);
-        art.modified_unix_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                   sys_time.time_since_epoch())
-                                   .count();
+        art.modified_unix_ms =
+            std::chrono::duration_cast<std::chrono::milliseconds>(sys_time.time_since_epoch())
+                .count();
     }
 
     if (want_checksum) {

@@ -13,7 +13,10 @@ std::int64_t PipelineRepository::upsert(const std::string& name,
         auto ins = db_.prepare(
             "INSERT INTO pipelines(name, definition_json, definition_hash, created_at) "
             "VALUES(?,?,?,?) ON CONFLICT(definition_hash) DO NOTHING;");
-        ins.bind(1, name).bind(2, definition_json).bind(3, definition_hash).bind(4, created_at);
+        ins.bind(1, name)
+            .bind(2, definition_json)
+            .bind(3, definition_hash)
+            .bind(4, created_at);
         ins.run();
     }
     auto sel = db_.prepare("SELECT id FROM pipelines WHERE definition_hash = ?;");
@@ -44,14 +47,19 @@ std::optional<PipelineRecord> PipelineRepository::get(std::int64_t id) {
 // ===========================================================================
 // PipelineRunRepository
 // ===========================================================================
-std::int64_t PipelineRunRepository::create(std::int64_t pipeline_id, const std::string& name,
-                                           int max_concurrency, const std::string& state,
+std::int64_t PipelineRunRepository::create(std::int64_t pipeline_id,
+                                           const std::string& name,
+                                           int max_concurrency,
+                                           const std::string& state,
                                            std::int64_t created_at) {
     auto s = db_.prepare(
         "INSERT INTO pipeline_runs(pipeline_id, name, state, max_concurrency, created_at) "
         "VALUES(?,?,?,?,?);");
-    s.bind(1, pipeline_id).bind(2, name).bind(3, state).bind(4, max_concurrency).bind(
-        5, created_at);
+    s.bind(1, pipeline_id)
+        .bind(2, name)
+        .bind(3, state)
+        .bind(4, max_concurrency)
+        .bind(5, created_at);
     s.run();
     return db_.last_insert_rowid();
 }
@@ -69,10 +77,10 @@ void PipelineRunRepository::mark_started(std::int64_t id, std::int64_t ts) {
     s.run();
 }
 
-void PipelineRunRepository::mark_finished(std::int64_t id, const std::string& state,
+void PipelineRunRepository::mark_finished(std::int64_t id,
+                                          const std::string& state,
                                           std::int64_t ts) {
-    auto s = db_.prepare(
-        "UPDATE pipeline_runs SET state = ?, finished_at = ? WHERE id = ?;");
+    auto s = db_.prepare("UPDATE pipeline_runs SET state = ?, finished_at = ? WHERE id = ?;");
     s.bind(1, state).bind(2, ts).bind(3, id);
     s.run();
 }
@@ -129,10 +137,10 @@ std::vector<PipelineRunRecord> PipelineRunRepository::list_in_state(const std::s
 // ===========================================================================
 // TaskRunRepository
 // ===========================================================================
-std::int64_t TaskRunRepository::create(std::int64_t run_id, const std::string& task_id,
+std::int64_t TaskRunRepository::create(std::int64_t run_id,
+                                       const std::string& task_id,
                                        const std::string& state) {
-    auto s = db_.prepare(
-        "INSERT INTO task_runs(run_id, task_id, state) VALUES(?,?,?);");
+    auto s = db_.prepare("INSERT INTO task_runs(run_id, task_id, state) VALUES(?,?,?);");
     s.bind(1, run_id).bind(2, task_id).bind(3, state);
     s.run();
     return db_.last_insert_rowid();
@@ -331,8 +339,11 @@ std::optional<CacheRecord> CacheRepository::lookup(const std::string& cache_key)
     return r;
 }
 
-void CacheRepository::store(const std::string& cache_key, const std::string& task_id,
-                            int exit_code, const std::string& outputs_json, std::int64_t now) {
+void CacheRepository::store(const std::string& cache_key,
+                            const std::string& task_id,
+                            int exit_code,
+                            const std::string& outputs_json,
+                            std::int64_t now) {
     auto s = db_.prepare(
         "INSERT INTO cache_entries(cache_key, task_id, exit_code, outputs_json, created_at, "
         "last_used_at, hit_count) VALUES(?,?,?,?,?,?,0) "

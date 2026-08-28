@@ -72,7 +72,8 @@ enum class PipelineState {
 
 // --- PipelineState -----------------------------------------------------
 [[nodiscard]] std::string_view to_string(PipelineState state) noexcept;
-[[nodiscard]] std::optional<PipelineState> parse_pipeline_state(std::string_view text) noexcept;
+[[nodiscard]] std::optional<PipelineState> parse_pipeline_state(
+    std::string_view text) noexcept;
 [[nodiscard]] bool is_terminal(PipelineState state) noexcept;
 
 }  // namespace flowforge::domain

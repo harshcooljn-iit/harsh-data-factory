@@ -64,16 +64,20 @@ void Database::exec(std::string_view sql) {
 
 Statement Database::prepare(std::string_view sql) {
     sqlite3_stmt* stmt = nullptr;
-    const int rc = sqlite3_prepare_v2(db_, sql.data(), static_cast<int>(sql.size()), &stmt,
-                                      nullptr);
+    const int rc =
+        sqlite3_prepare_v2(db_, sql.data(), static_cast<int>(sql.size()), &stmt, nullptr);
     if (rc != SQLITE_OK) {
         fail(db_, "prepare", rc);
     }
     return Statement(db_, stmt);
 }
 
-std::int64_t Database::last_insert_rowid() const { return sqlite3_last_insert_rowid(db_); }
-int Database::changes() const { return sqlite3_changes(db_); }
+std::int64_t Database::last_insert_rowid() const {
+    return sqlite3_last_insert_rowid(db_);
+}
+int Database::changes() const {
+    return sqlite3_changes(db_);
+}
 
 std::int64_t Database::user_version() {
     Statement s = prepare("PRAGMA user_version;");
@@ -204,7 +208,9 @@ std::optional<std::string> Statement::column_opt_text(int column) const {
 // ===========================================================================
 // Transaction
 // ===========================================================================
-Transaction::Transaction(Database& db) : db_(db) { db_.exec("BEGIN;"); }
+Transaction::Transaction(Database& db) : db_(db) {
+    db_.exec("BEGIN;");
+}
 
 Transaction::~Transaction() {
     if (active_) {

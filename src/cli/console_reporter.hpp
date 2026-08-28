@@ -19,10 +19,10 @@ namespace flowforge::cli {
 // Callbacks arrive on the scheduler thread; a mutex guards stdout only.
 // ---------------------------------------------------------------------------
 class ConsoleReporter final : public scheduler::SchedulerObserver {
-  public:
+public:
     struct Options {
-        bool plain = false;       ///< force CI-style output
-        bool quiet = false;       ///< suppress per-task log lines
+        bool plain = false;  ///< force CI-style output
+        bool quiet = false;  ///< suppress per-task log lines
         bool show_logs = true;
     };
 
@@ -31,11 +31,13 @@ class ConsoleReporter final : public scheduler::SchedulerObserver {
     void on_run_started(const domain::PipelineRun& run) override;
     void on_task_state_changed(const domain::TaskRun& task,
                                domain::TaskState previous) override;
-    void on_task_log(std::string_view task_id, int attempt, std::string_view stream,
+    void on_task_log(std::string_view task_id,
+                     int attempt,
+                     std::string_view stream,
                      std::string_view line) override;
     void on_run_finished(const domain::PipelineRun& run) override;
 
-  private:
+private:
     void print_status(std::string_view tag, std::string_view task_id, std::string extra);
 
     Options options_;

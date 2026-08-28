@@ -21,8 +21,8 @@ TEST(ResourcePool, ReservationNeverExceedsCapacity) {
     EXPECT_FALSE(pool.try_reserve(cpu(4)));  // C  -> must wait
     EXPECT_EQ(pool.available().total_cpu_cores, 0);
 
-    pool.release(cpu(4));                     // A done
-    EXPECT_TRUE(pool.try_reserve(cpu(4)));    // C can go now
+    pool.release(cpu(4));                   // A done
+    EXPECT_TRUE(pool.try_reserve(cpu(4)));  // C can go now
 }
 
 TEST(ResourcePool, MemoryAndGpuAccounting) {

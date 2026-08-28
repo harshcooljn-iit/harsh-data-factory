@@ -29,14 +29,13 @@ TEST(ProcessSpec, EnvironmentBlockAppliesOverridesAndKeepsOrder) {
 
 TEST(ProcessSpec, EnvironmentBlockOverridesInheritedValueInPlace) {
     ::setenv("FF_SPEC_TEST_VAR", "inherited", 1);
-    const auto block =
-        build_environment_block({{"FF_SPEC_TEST_VAR", "overridden"}}, /*inherit_current=*/true);
+    const auto block = build_environment_block({{"FF_SPEC_TEST_VAR", "overridden"}},
+                                               /*inherit_current=*/true);
     const auto it = std::find(block.begin(), block.end(), "FF_SPEC_TEST_VAR=overridden");
     EXPECT_NE(it, block.end());
-    EXPECT_EQ(std::count_if(block.begin(), block.end(),
-                            [](const std::string& e) {
-                                return e.rfind("FF_SPEC_TEST_VAR=", 0) == 0;
-                            }),
+    EXPECT_EQ(std::count_if(
+                  block.begin(), block.end(),
+                  [](const std::string& e) { return e.rfind("FF_SPEC_TEST_VAR=", 0) == 0; }),
               1);
     ::unsetenv("FF_SPEC_TEST_VAR");
 }

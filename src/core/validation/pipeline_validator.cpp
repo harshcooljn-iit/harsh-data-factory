@@ -50,8 +50,8 @@ std::optional<fs::path> resolve_program(const std::string& program, const fs::pa
     std::size_t start = 0;
     while (start <= paths.size()) {
         const std::size_t colon = paths.find(':', start);
-        const std::string dir =
-            paths.substr(start, colon == std::string::npos ? std::string::npos : colon - start);
+        const std::string dir = paths.substr(
+            start, colon == std::string::npos ? std::string::npos : colon - start);
         if (!dir.empty()) {
             const fs::path candidate = fs::path(dir) / program;
             if (is_executable_file(candidate)) {
@@ -202,16 +202,14 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
             }
             if (task.program.empty()) {
                 sink.error(task.id, "interpreter", "python task has no interpreter");
-            } else if (options.check_executables &&
-                       !resolve_program(task.program, work_dir)) {
+            } else if (options.check_executables && !resolve_program(task.program, work_dir)) {
                 sink.error(task.id, "interpreter",
                            "Python interpreter not found: " + task.program);
             }
             if (!task.script.empty()) {
-                const fs::path script_path =
-                    fs::path(task.script).is_absolute()
-                        ? fs::path(task.script)
-                        : (work_dir / task.script).lexically_normal();
+                const fs::path script_path = fs::path(task.script).is_absolute()
+                                                 ? fs::path(task.script)
+                                                 : (work_dir / task.script).lexically_normal();
                 std::error_code ec;
                 if (options.check_executables && !fs::is_regular_file(script_path, ec)) {
                     sink.error(task.id, "script",
@@ -221,8 +219,7 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
         } else {
             if (task.program.empty()) {
                 sink.error(task.id, "executable", "executable task has no executable");
-            } else if (options.check_executables &&
-                       !resolve_program(task.program, work_dir)) {
+            } else if (options.check_executables && !resolve_program(task.program, work_dir)) {
                 sink.error(task.id, "executable",
                            "executable not found or not runnable: " + task.program);
             }
@@ -237,7 +234,8 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
                        "backoff_multiplier must not be negative");
         }
         if (task.resources.cpu_cores < 1) {
-            sink.error(task.id, "resources.cpu_cores", "a task must request at least 1 CPU core");
+            sink.error(task.id, "resources.cpu_cores",
+                       "a task must request at least 1 CPU core");
         }
         if (task.resources.memory_mb < 0 || task.resources.gpu_count < 0) {
             sink.error(task.id, "resources", "resource requirements must not be negative");

@@ -18,7 +18,7 @@ namespace flowforge::storage {
 // than "database error".
 // ---------------------------------------------------------------------------
 class DatabaseError : public std::runtime_error {
-  public:
+public:
     DatabaseError(std::string context, std::string detail, int code)
         : std::runtime_error(context + ": " + detail),
           context_(std::move(context)),
@@ -29,7 +29,7 @@ class DatabaseError : public std::runtime_error {
     [[nodiscard]] const std::string& detail() const noexcept { return detail_; }
     [[nodiscard]] int code() const noexcept { return code_; }
 
-  private:
+private:
     std::string context_;
     std::string detail_;
     int code_;
@@ -44,7 +44,7 @@ class Statement;
 // on open.
 // ---------------------------------------------------------------------------
 class Database {
-  public:
+public:
     /// Open (creating if needed) the database at @p path. ":memory:" is valid.
     explicit Database(const std::string& path);
     ~Database();
@@ -68,7 +68,7 @@ class Database {
 
     [[nodiscard]] sqlite3* handle() const noexcept { return db_; }
 
-  private:
+private:
     sqlite3* db_ = nullptr;
 };
 
@@ -77,7 +77,7 @@ class Database {
 // match SQLite. step() returns true while a row is available.
 // ---------------------------------------------------------------------------
 class Statement {
-  public:
+public:
     Statement() = default;
     Statement(sqlite3* db, sqlite3_stmt* stmt) : db_(db), stmt_(stmt) {}
     ~Statement();
@@ -88,7 +88,9 @@ class Statement {
     Statement& operator=(Statement&&) noexcept;
 
     Statement& bind(int index, std::int64_t value);
-    Statement& bind(int index, int value) { return bind(index, static_cast<std::int64_t>(value)); }
+    Statement& bind(int index, int value) {
+        return bind(index, static_cast<std::int64_t>(value));
+    }
     Statement& bind(int index, double value);
     Statement& bind(int index, std::string_view value);
     Statement& bind(int index, const std::string& value) {
@@ -116,7 +118,7 @@ class Statement {
     [[nodiscard]] std::optional<std::int64_t> column_opt_int64(int column) const;
     [[nodiscard]] std::optional<std::string> column_opt_text(int column) const;
 
-  private:
+private:
     void check(int rc, const char* what) const;
 
     sqlite3* db_ = nullptr;
@@ -128,7 +130,7 @@ class Statement {
 // (e.g. an exception propagates).
 // ---------------------------------------------------------------------------
 class Transaction {
-  public:
+public:
     explicit Transaction(Database& db);
     ~Transaction();
 
@@ -137,7 +139,7 @@ class Transaction {
 
     void commit();
 
-  private:
+private:
     Database& db_;
     bool active_ = true;
 };

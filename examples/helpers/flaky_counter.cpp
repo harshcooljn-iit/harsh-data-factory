@@ -23,7 +23,9 @@ int main(int argc, char** argv) {
         }
     }
     ++attempt;
-    { std::ofstream(path, std::ios::trunc) << attempt << "\n"; }
+    {
+        std::ofstream(path, std::ios::trunc) << attempt << "\n";
+    }
 
     if (attempt >= threshold) {
         std::cout << "attempt " << attempt << ": succeeded\n";

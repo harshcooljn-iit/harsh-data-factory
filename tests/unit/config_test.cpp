@@ -67,7 +67,9 @@ TEST(Config, EnvironmentOverridesFile) {
 TEST(Config, MalformedFileIsIgnored) {
     const auto dir = fs::temp_directory_path() / "ff_cfg_bad_test";
     fs::create_directories(dir);
-    { std::ofstream(dir / "flowforge.json") << "{ this is not json"; }
+    {
+        std::ofstream(dir / "flowforge.json") << "{ this is not json";
+    }
     Config::LoadOptions opts;
     opts.working_dir = dir.string();
     const auto c = Config::load(opts);  // must not throw

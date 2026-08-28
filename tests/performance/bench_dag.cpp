@@ -55,21 +55,21 @@ TEST(BenchDag, BuildCycleTopoAcrossSizes) {
     std::printf("\n[DAG build + cycle-check + topological sort]\n");
     for (const int n : {100, 1000, 10000}) {
         auto [nodes, edges] = make_chain(n);
-        const double ms = bench(
-            "chain n=" + std::to_string(n), 20, [&] {
-                auto r = Dag::build(nodes, edges);
-                ASSERT_TRUE(r.ok());
-                ASSERT_EQ(r.dag->topological_order().size(), static_cast<std::size_t>(n));
-            });
+        const double ms = bench("chain n=" + std::to_string(n), 20, [&] {
+            auto r = Dag::build(nodes, edges);
+            ASSERT_TRUE(r.ok());
+            ASSERT_EQ(r.dag->topological_order().size(), static_cast<std::size_t>(n));
+        });
         EXPECT_LT(ms, 250.0) << "chain build regressed badly at n=" << n;
     }
 
-    for (const auto [layers, width] : {std::pair{10, 10}, std::pair{20, 30}, std::pair{20, 70}}) {
+    for (const auto [layers, width] :
+         {std::pair{10, 10}, std::pair{20, 30}, std::pair{20, 70}}) {
         auto g = make_layered(layers, width);
         const std::size_t node_count = g.nodes.size();
         const std::size_t edge_count = g.edges.size();
-        bench("layered nodes=" + std::to_string(node_count) + " edges=" +
-                  std::to_string(edge_count),
+        bench("layered nodes=" + std::to_string(node_count) +
+                  " edges=" + std::to_string(edge_count),
               10, [&] {
                   auto r = Dag::build(g.nodes, g.edges);
                   ASSERT_TRUE(r.ok());
@@ -83,8 +83,10 @@ TEST(BenchDag, TransitiveDependentsWideGraph) {
     auto r = Dag::build(g.nodes, g.edges);
     ASSERT_TRUE(r.ok());
     const Dag& dag = *r.dag;
-    bench("transitive_dependents(root)", 200,
-          [&] { volatile auto v = dag.transitive_dependents(dag.roots().front()).size(); (void)v; });
+    bench("transitive_dependents(root)", 200, [&] {
+        volatile auto v = dag.transitive_dependents(dag.roots().front()).size();
+        (void)v;
+    });
 }
 
 }  // namespace

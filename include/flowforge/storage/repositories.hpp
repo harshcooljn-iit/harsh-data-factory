@@ -92,22 +92,27 @@ struct ArtifactRecord {
 // ---------------------------------------------------------------------------
 
 class PipelineRepository {
-  public:
+public:
     explicit PipelineRepository(Database& db) : db_(db) {}
     /// Insert the definition if its hash is new; return the row id either way.
-    std::int64_t upsert(const std::string& name, const std::string& definition_json,
-                        const std::string& definition_hash, std::int64_t created_at);
+    std::int64_t upsert(const std::string& name,
+                        const std::string& definition_json,
+                        const std::string& definition_hash,
+                        std::int64_t created_at);
     std::optional<PipelineRecord> get(std::int64_t id);
 
-  private:
+private:
     Database& db_;
 };
 
 class PipelineRunRepository {
-  public:
+public:
     explicit PipelineRunRepository(Database& db) : db_(db) {}
-    std::int64_t create(std::int64_t pipeline_id, const std::string& name, int max_concurrency,
-                        const std::string& state, std::int64_t created_at);
+    std::int64_t create(std::int64_t pipeline_id,
+                        const std::string& name,
+                        int max_concurrency,
+                        const std::string& state,
+                        std::int64_t created_at);
     void set_state(std::int64_t id, const std::string& state);
     void mark_started(std::int64_t id, std::int64_t ts);
     void mark_finished(std::int64_t id, const std::string& state, std::int64_t ts);
@@ -115,14 +120,15 @@ class PipelineRunRepository {
     std::vector<PipelineRunRecord> list_recent(int limit);
     std::vector<PipelineRunRecord> list_in_state(const std::string& state);
 
-  private:
+private:
     Database& db_;
 };
 
 class TaskRunRepository {
-  public:
+public:
     explicit TaskRunRepository(Database& db) : db_(db) {}
-    std::int64_t create(std::int64_t run_id, const std::string& task_id,
+    std::int64_t create(std::int64_t run_id,
+                        const std::string& task_id,
                         const std::string& state);
     void set_state(std::int64_t id, const std::string& state);
     void set_ready_at(std::int64_t id, std::int64_t ts);
@@ -131,55 +137,59 @@ class TaskRunRepository {
     void set_attempts(std::int64_t id, int attempts);
     std::vector<TaskRunRecord> list_for_run(std::int64_t run_id);
 
-  private:
+private:
     Database& db_;
 };
 
 class TaskAttemptRepository {
-  public:
+public:
     explicit TaskAttemptRepository(Database& db) : db_(db) {}
     std::int64_t insert(const TaskAttemptRecord& rec);
     std::vector<TaskAttemptRecord> list_for_task_run(std::int64_t task_run_id);
 
-  private:
+private:
     Database& db_;
 };
 
 class LogRepository {
-  public:
+public:
     explicit LogRepository(Database& db) : db_(db) {}
     void insert(const LogRecord& rec);
     void insert_batch(const std::vector<LogRecord>& records);
     std::vector<LogRecord> query(std::int64_t run_id,
-                                 const std::optional<std::string>& task_id, int limit);
+                                 const std::optional<std::string>& task_id,
+                                 int limit);
 
-  private:
+private:
     Database& db_;
 };
 
 class CacheRepository {
-  public:
+public:
     explicit CacheRepository(Database& db) : db_(db) {}
     std::optional<CacheRecord> lookup(const std::string& cache_key);
-    void store(const std::string& cache_key, const std::string& task_id, int exit_code,
-               const std::string& outputs_json, std::int64_t now);
+    void store(const std::string& cache_key,
+               const std::string& task_id,
+               int exit_code,
+               const std::string& outputs_json,
+               std::int64_t now);
     void touch(const std::string& cache_key, std::int64_t now);
     void remove(const std::string& cache_key);
     int clear_all();
     int prune_older_than(std::int64_t cutoff_ts);
     std::int64_t count();
 
-  private:
+private:
     Database& db_;
 };
 
 class ArtifactRepository {
-  public:
+public:
     explicit ArtifactRepository(Database& db) : db_(db) {}
     void insert(const ArtifactRecord& rec);
     std::vector<ArtifactRecord> list_for_run(std::int64_t run_id);
 
-  private:
+private:
     Database& db_;
 };
 

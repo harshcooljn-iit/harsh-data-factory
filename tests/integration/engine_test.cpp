@@ -25,11 +25,11 @@ struct EngineTest : ::testing::Test {
     engine::Config cfg;
 
     void SetUp() override {
-        root = fs::temp_directory_path() /
-               ("ff_engine_" + std::to_string(::testing::UnitTest::GetInstance()
-                                                  ->current_test_info()
-                                                  ->line()) +
-                "_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)));
+        root =
+            fs::temp_directory_path() /
+            ("ff_engine_" +
+             std::to_string(::testing::UnitTest::GetInstance()->current_test_info()->line()) +
+             "_" + std::to_string(reinterpret_cast<std::uintptr_t>(this)));
         fs::create_directories(root);
         cfg = engine::Config::defaults();
         cfg.state_dir = (root / ".flowforge").string();
@@ -41,7 +41,8 @@ struct EngineTest : ::testing::Test {
         fs::remove_all(root, ec);
     }
 
-    TaskDefinition exec_task(const std::string& id, std::string program,
+    TaskDefinition exec_task(const std::string& id,
+                             std::string program,
                              std::vector<std::string> args) {
         TaskDefinition t;
         t.id = id;
@@ -145,7 +146,8 @@ TEST_F(EngineTest, FailurePropagationSkipsDownstreamKeepsIndependentBranch) {
 
 TEST_F(EngineTest, CacheHitOnSecondRun) {
     auto p = pipeline("cache");
-    auto t = exec_task("make", test::kHelperEmit, {"--write", "out.txt", "--stdout-lines", "1"});
+    auto t =
+        exec_task("make", test::kHelperEmit, {"--write", "out.txt", "--stdout-lines", "1"});
     t.cache_enabled = true;
     t.outputs = {{"out", "out.txt", false}};
     p.tasks = {t};

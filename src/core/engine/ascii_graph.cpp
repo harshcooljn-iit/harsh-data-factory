@@ -26,9 +26,13 @@ std::vector<int> compute_levels(const dag::Dag& graph) {
     return level;
 }
 
-void render_tree(const dag::Dag& graph, const std::string& node_id,
-                 const std::string& line_prefix, bool is_root, bool is_last,
-                 std::vector<char>& expanded, std::ostringstream& out) {
+void render_tree(const dag::Dag& graph,
+                 const std::string& node_id,
+                 const std::string& line_prefix,
+                 bool is_root,
+                 bool is_last,
+                 std::vector<char>& expanded,
+                 std::ostringstream& out) {
     const auto idx = graph.index_of(node_id);
     if (!idx) {
         return;

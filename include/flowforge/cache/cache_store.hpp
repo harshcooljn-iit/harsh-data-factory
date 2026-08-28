@@ -36,7 +36,7 @@ struct CachedOutcome {
 //   * a hit bumps last_used_at / hit_count.
 // ---------------------------------------------------------------------------
 class CacheStore {
-  public:
+public:
     CacheStore(storage::CacheRepository& repo, bool enabled)
         : repo_(&repo), enabled_(enabled) {}
 
@@ -47,10 +47,12 @@ class CacheStore {
                                                       std::int64_t now_ms);
 
     /// Record a successful execution. No-op if the cache is disabled.
-    void store(const std::string& cache_key, const std::string& task_id,
-               const CachedOutcome& outcome, std::int64_t now_ms);
+    void store(const std::string& cache_key,
+               const std::string& task_id,
+               const CachedOutcome& outcome,
+               std::int64_t now_ms);
 
-  private:
+private:
     storage::CacheRepository* repo_;
     bool enabled_;
 };

@@ -11,13 +11,14 @@ namespace flowforge::test {
 
 // Small fluent helper for assembling a PipelineDefinition + its Dag in tests.
 class PipelineBuilder {
-  public:
+public:
     explicit PipelineBuilder(std::string name = "test") {
         pipeline_.name = std::move(name);
         pipeline_.base_directory = ".";
     }
 
-    PipelineBuilder& task(const std::string& id, const std::string& program = "prog",
+    PipelineBuilder& task(const std::string& id,
+                          const std::string& program = "prog",
                           int priority = 0) {
         domain::TaskDefinition t;
         t.id = id;
@@ -68,7 +69,7 @@ class PipelineBuilder {
         return std::move(*result.dag);
     }
 
-  private:
+private:
     domain::PipelineDefinition pipeline_;
 };
 

@@ -26,7 +26,9 @@ using domain::TaskState;
 
 namespace {
 
-std::int64_t now_ms() { return util::to_unix_millis(util::now()); }
+std::int64_t now_ms() {
+    return util::to_unix_millis(util::now());
+}
 
 std::optional<std::int64_t> tp_ms(const std::optional<util::TimePoint>& tp) {
     if (!tp) {
@@ -41,8 +43,9 @@ std::optional<std::int64_t> tp_ms(const std::optional<util::TimePoint>& tp) {
 // connection is used without extra locking.
 // -------------------------------------------------------------------------
 class PersistenceObserver final : public scheduler::SchedulerObserver {
-  public:
-    PersistenceObserver(storage::Database& db, domain::RunId run_id,
+public:
+    PersistenceObserver(storage::Database& db,
+                        domain::RunId run_id,
                         std::unordered_map<std::string, std::int64_t> task_run_ids)
         : run_id_(run_id),
           task_runs_(db),
@@ -95,7 +98,9 @@ class PersistenceObserver final : public scheduler::SchedulerObserver {
         attempts_.insert(rec);
     }
 
-    void on_task_log(std::string_view task_id, int attempt, std::string_view stream,
+    void on_task_log(std::string_view task_id,
+                     int attempt,
+                     std::string_view stream,
                      std::string_view line) override {
         storage::LogRecord rec;
         rec.run_id = run_id_;
@@ -129,7 +134,7 @@ class PersistenceObserver final : public scheduler::SchedulerObserver {
         }
     }
 
-  private:
+private:
     domain::RunId run_id_;
     storage::TaskRunRepository task_runs_;
     storage::TaskAttemptRepository attempts_;
@@ -140,31 +145,38 @@ class PersistenceObserver final : public scheduler::SchedulerObserver {
 
 // Fan a single scheduler event stream out to several observers.
 class FanoutObserver final : public scheduler::SchedulerObserver {
-  public:
+public:
     void add(scheduler::SchedulerObserver* obs) {
         if (obs != nullptr) {
             sinks_.push_back(obs);
         }
     }
     void on_run_started(const domain::PipelineRun& r) override {
-        for (auto* s : sinks_) s->on_run_started(r);
+        for (auto* s : sinks_)
+            s->on_run_started(r);
     }
     void on_task_state_changed(const domain::TaskRun& t, TaskState p) override {
-        for (auto* s : sinks_) s->on_task_state_changed(t, p);
+        for (auto* s : sinks_)
+            s->on_task_state_changed(t, p);
     }
     void on_task_attempt_recorded(const domain::TaskRun& t,
                                   const domain::TaskAttempt& a) override {
-        for (auto* s : sinks_) s->on_task_attempt_recorded(t, a);
+        for (auto* s : sinks_)
+            s->on_task_attempt_recorded(t, a);
     }
-    void on_task_log(std::string_view id, int attempt, std::string_view stream,
+    void on_task_log(std::string_view id,
+                     int attempt,
+                     std::string_view stream,
                      std::string_view line) override {
-        for (auto* s : sinks_) s->on_task_log(id, attempt, stream, line);
+        for (auto* s : sinks_)
+            s->on_task_log(id, attempt, stream, line);
     }
     void on_run_finished(const domain::PipelineRun& r) override {
-        for (auto* s : sinks_) s->on_run_finished(r);
+        for (auto* s : sinks_)
+            s->on_run_finished(r);
     }
 
-  private:
+private:
     std::vector<scheduler::SchedulerObserver*> sinks_;
 };
 
@@ -174,7 +186,7 @@ class FanoutObserver final : public scheduler::SchedulerObserver {
 // Engine::Impl
 // ===========================================================================
 class Engine::Impl {
-  public:
+public:
     explicit Impl(const Config& config) : db_(open_db(config)) {
         storage::migrate_to_latest(db_);
     }
@@ -397,8 +409,7 @@ std::vector<Engine::RunView> Engine::list_runs(int limit) {
         RunView view;
         view.id = rec.id;
         view.pipeline_name = rec.name;
-        view.state =
-            domain::parse_pipeline_state(rec.state).value_or(PipelineState::kCreated);
+        view.state = domain::parse_pipeline_state(rec.state).value_or(PipelineState::kCreated);
         view.created_at = rec.created_at;
         view.started_at = rec.started_at;
         view.finished_at = rec.finished_at;

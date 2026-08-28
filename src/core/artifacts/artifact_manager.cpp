@@ -30,7 +30,8 @@ fs::path ArtifactManager::resolve_artifact_path(const domain::TaskDefinition& ta
 }
 
 Artifact ArtifactManager::probe(const domain::TaskDefinition& task,
-                                const domain::ArtifactDecl& decl, bool force_checksum) const {
+                                const domain::ArtifactDecl& decl,
+                                bool force_checksum) const {
     return probe_artifact(decl.name, resolve_artifact_path(task, decl),
                           decl.checksum || force_checksum);
 }

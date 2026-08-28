@@ -34,7 +34,9 @@ struct RecordingObserver : SchedulerObserver {
             running_order.push_back(task.task_id);
         }
     }
-    void on_task_log(std::string_view id, int, std::string_view stream,
+    void on_task_log(std::string_view id,
+                     int,
+                     std::string_view stream,
                      std::string_view line) override {
         std::lock_guard<std::mutex> lock(m);
         log_lines.push_back(std::string(id) + "/" + std::string(stream) + ":" +

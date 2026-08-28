@@ -13,7 +13,7 @@ namespace {
 using namespace flowforge::domain;
 
 TEST(Enums, TaskStateRoundTrips) {
-    constexpr std::array all{TaskState::kPending, TaskState::kReady,   TaskState::kRunning,
+    constexpr std::array all{TaskState::kPending,   TaskState::kReady,  TaskState::kRunning,
                              TaskState::kSucceeded, TaskState::kFailed, TaskState::kSkipped,
                              TaskState::kCancelled, TaskState::kCached};
     for (auto s : all) {

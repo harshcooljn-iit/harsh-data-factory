@@ -22,13 +22,13 @@ constexpr RunId kInvalidRunId = -1;
 // ---------------------------------------------------------------------------
 enum class ResultKind {
     kSucceeded,
-    kFailedExit,      ///< process ran and exited non-zero
-    kTimeout,         ///< killed after exceeding its timeout
-    kCrashed,         ///< terminated by signal
-    kStartFailure,    ///< could not spawn (missing interpreter/executable, ...)
-    kMissingOutput,   ///< exited zero but a declared output is absent
-    kMissingInput,    ///< a declared input file was absent before launch
-    kCancelled,       ///< terminated due to run cancellation
+    kFailedExit,     ///< process ran and exited non-zero
+    kTimeout,        ///< killed after exceeding its timeout
+    kCrashed,        ///< terminated by signal
+    kStartFailure,   ///< could not spawn (missing interpreter/executable, ...)
+    kMissingOutput,  ///< exited zero but a declared output is absent
+    kMissingInput,   ///< a declared input file was absent before launch
+    kCancelled,      ///< terminated due to run cancellation
 };
 
 [[nodiscard]] std::string_view to_string(ResultKind kind) noexcept;
@@ -38,8 +38,8 @@ struct TaskResult {
     ResultKind kind = ResultKind::kSucceeded;
     std::optional<int> exit_code;
     std::optional<int> term_signal;
-    std::string message;      ///< concise, user-facing
-    std::string detail;       ///< optional longer diagnostic
+    std::string message;  ///< concise, user-facing
+    std::string detail;   ///< optional longer diagnostic
 
     [[nodiscard]] bool ok() const noexcept { return kind == ResultKind::kSucceeded; }
     [[nodiscard]] bool retryable() const noexcept { return is_retryable(kind); }
@@ -52,7 +52,7 @@ struct TaskResult {
 // persisted, including failed ones.
 // ---------------------------------------------------------------------------
 struct TaskAttempt {
-    int attempt_number = 1;              // 1-based
+    int attempt_number = 1;  // 1-based
     TaskState final_state = TaskState::kPending;
     std::optional<std::int64_t> pid;
     std::optional<util::TimePoint> started_at;

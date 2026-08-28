@@ -22,7 +22,7 @@ namespace flowforge::engine {
 // tests and any future front end use this same class.
 // ---------------------------------------------------------------------------
 class Engine {
-  public:
+public:
     explicit Engine(Config config);
     ~Engine();
 
@@ -55,7 +55,8 @@ class Engine {
 
     /// Validate, persist and execute @p pipeline. On validation failure no run
     /// row is created and RunReport::validation_failed is set.
-    RunReport run_pipeline(const domain::PipelineDefinition& pipeline, const RunRequest& request);
+    RunReport run_pipeline(const domain::PipelineDefinition& pipeline,
+                           const RunRequest& request);
 
     /// Create a cancellation sentinel for a run executing in another process.
     /// Returns false if the run is unknown or already finished.
@@ -92,7 +93,7 @@ class Engine {
     int prune_cache(int older_than_days);
     [[nodiscard]] std::int64_t cache_entry_count();
 
-  private:
+private:
     class Impl;
     std::unique_ptr<Impl> impl_;
     Config config_;

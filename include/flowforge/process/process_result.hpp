@@ -23,10 +23,10 @@ enum class ProcessOutcome {
 
 struct ProcessResult {
     ProcessOutcome outcome = ProcessOutcome::kSpawnFailed;
-    int exit_code = -1;                 ///< valid iff outcome == kExited
-    int term_signal = 0;               ///< signal number for signalled/timeout/cancel
-    std::optional<std::int64_t> pid;   ///< set once the child was spawned
-    std::string spawn_error;           ///< human-readable, only for kSpawnFailed
+    int exit_code = -1;               ///< valid iff outcome == kExited
+    int term_signal = 0;              ///< signal number for signalled/timeout/cancel
+    std::optional<std::int64_t> pid;  ///< set once the child was spawned
+    std::string spawn_error;          ///< human-readable, only for kSpawnFailed
     std::chrono::milliseconds duration{0};
 
     [[nodiscard]] bool succeeded() const noexcept {

@@ -19,7 +19,7 @@ namespace flowforge::artifacts {
 // Absolute paths in either field are used as-is.
 // ---------------------------------------------------------------------------
 class ArtifactManager {
-  public:
+public:
     explicit ArtifactManager(std::filesystem::path pipeline_base_dir);
 
     [[nodiscard]] std::filesystem::path resolve_working_dir(
@@ -45,7 +45,7 @@ class ArtifactManager {
     [[nodiscard]] std::vector<std::string> missing_outputs(
         const domain::TaskDefinition& task) const;
 
-  private:
+private:
     std::filesystem::path base_dir_;
 };
 

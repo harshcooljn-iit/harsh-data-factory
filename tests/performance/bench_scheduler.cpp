@@ -66,8 +66,8 @@ void run_wide(int width, int concurrency) {
 TEST(BenchScheduler, DeepChainThroughput) {
     std::printf("\n[scheduler: deep dependency chain, instant tasks]\n");
     for (const int n : {100, 1000, 5000}) {
-        const double ms = bench("chain n=" + std::to_string(n) + " conc=1", 5,
-                                [&] { run_chain(n, 1); });
+        const double ms =
+            bench("chain n=" + std::to_string(n) + " conc=1", 5, [&] { run_chain(n, 1); });
         EXPECT_LT(ms, 5000.0);
     }
 }
@@ -75,8 +75,8 @@ TEST(BenchScheduler, DeepChainThroughput) {
 TEST(BenchScheduler, WideFanoutThroughput) {
     std::printf("\n[scheduler: wide fan-out/fan-in, instant tasks]\n");
     for (const int w : {100, 1000, 3000}) {
-        const double ms = bench("width=" + std::to_string(w) + " conc=8", 5,
-                                [&] { run_wide(w, 8); });
+        const double ms =
+            bench("width=" + std::to_string(w) + " conc=8", 5, [&] { run_wide(w, 8); });
         EXPECT_LT(ms, 15000.0);
     }
 }

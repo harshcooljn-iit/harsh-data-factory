@@ -35,11 +35,11 @@ TEST(PosixProcessRunner, CapturesStdoutStderrAndExitCode) {
     PosixProcessRunner runner;
     std::string out;
     std::string err;
-    const auto result = run_blocking(
-        runner,
-        spec_for(flowforge::test::kHelperEmit,
-                 {"--stdout-lines", "3", "--stderr-lines", "2", "--exit", "7"}),
-        &out, &err);
+    const auto result =
+        run_blocking(runner,
+                     spec_for(flowforge::test::kHelperEmit,
+                              {"--stdout-lines", "3", "--stderr-lines", "2", "--exit", "7"}),
+                     &out, &err);
 
     EXPECT_EQ(result.outcome, ProcessOutcome::kExited);
     EXPECT_EQ(result.exit_code, 7);
@@ -52,8 +52,7 @@ TEST(PosixProcessRunner, CapturesStdoutStderrAndExitCode) {
 
 TEST(PosixProcessRunner, ReportsSpawnFailureForMissingExecutable) {
     PosixProcessRunner runner;
-    const auto result =
-        run_blocking(runner, spec_for("/nonexistent/flowforge/xyzzy", {}));
+    const auto result = run_blocking(runner, spec_for("/nonexistent/flowforge/xyzzy", {}));
     EXPECT_EQ(result.outcome, ProcessOutcome::kSpawnFailed);
     EXPECT_FALSE(result.spawn_error.empty());
 }
@@ -63,9 +62,8 @@ TEST(PosixProcessRunner, DeliversFinalPartialLineWithoutNewline) {
     std::string out;
     const auto result = run_blocking(
         runner,
-        spec_for(flowforge::test::kHelperEmit,
-                 {"--stdout-lines", "2", "--no-newline"}),
-        &out, nullptr);
+        spec_for(flowforge::test::kHelperEmit, {"--stdout-lines", "2", "--no-newline"}), &out,
+        nullptr);
     EXPECT_TRUE(result.succeeded());
     // run_blocking appends '\n' per delivered line; both lines must arrive.
     EXPECT_EQ(std::count(out.begin(), out.end(), '\n'), 2);
@@ -79,8 +77,7 @@ TEST(PosixProcessRunner, HonoursWorkingDirectory) {
     const auto marker = sub / "made_here.txt";
     fs::remove(marker);
 
-    ProcessSpec s = spec_for(flowforge::test::kHelperEmit,
-                             {"--write", "made_here.txt"});
+    ProcessSpec s = spec_for(flowforge::test::kHelperEmit, {"--write", "made_here.txt"});
     s.working_directory = sub.string();
     const auto result = run_blocking(runner, s);
 
@@ -133,8 +130,8 @@ TEST(PosixProcessRunner, RunsManyProcessesConcurrentlyOnOneThread) {
             ++finished;
             cv.notify_all();
         };
-        const auto h = runner.launch(
-            spec_for(flowforge::test::kHelperSleeper, {"400"}), std::move(cb));
+        const auto h =
+            runner.launch(spec_for(flowforge::test::kHelperSleeper, {"400"}), std::move(cb));
         ASSERT_NE(h, kInvalidHandle);
     }
 

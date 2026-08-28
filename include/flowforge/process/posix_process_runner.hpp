@@ -20,7 +20,7 @@ namespace flowforge::process {
 // descriptors to one poll set, not N threads. Works on macOS and Linux.
 // ---------------------------------------------------------------------------
 class PosixProcessRunner final : public ProcessRunner {
-  public:
+public:
     struct Options {
         /// Grace period between SIGTERM and SIGKILL.
         std::chrono::milliseconds terminate_grace{std::chrono::seconds{2}};
@@ -38,7 +38,7 @@ class PosixProcessRunner final : public ProcessRunner {
     void request_terminate(ProcessHandle handle, bool as_cancellation) override;
     [[nodiscard]] std::size_t active_count() const override;
 
-  private:
+private:
     class Impl;
     std::unique_ptr<Impl> impl_;
 };

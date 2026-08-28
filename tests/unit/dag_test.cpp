@@ -43,18 +43,18 @@ TEST(Dag, EdgesGiveDependenciesAndDependents) {
 }
 
 TEST(Dag, RootsAndLeaves) {
-    const auto dag = build_ok({"r1", "r2", "mid", "leaf"},
-                              {{"r1", "mid"}, {"r2", "mid"}, {"mid", "leaf"}});
+    const auto dag =
+        build_ok({"r1", "r2", "mid", "leaf"}, {{"r1", "mid"}, {"r2", "mid"}, {"mid", "leaf"}});
     EXPECT_EQ(dag.roots(), (std::vector<std::string>{"r1", "r2"}));
     EXPECT_EQ(dag.leaves(), (std::vector<std::string>{"leaf"}));
 }
 
 TEST(Dag, TopologicalOrderRespectsEdges) {
-    const auto dag = build_ok({"prepare", "features", "stats", "train"},
-                              {{"prepare", "features"},
-                               {"prepare", "stats"},
-                               {"features", "train"},
-                               {"stats", "train"}});
+    const auto dag =
+        build_ok({"prepare", "features", "stats", "train"}, {{"prepare", "features"},
+                                                             {"prepare", "stats"},
+                                                             {"features", "train"},
+                                                             {"stats", "train"}});
     EXPECT_TRUE(topo_precedes(dag, "prepare", "features"));
     EXPECT_TRUE(topo_precedes(dag, "prepare", "stats"));
     EXPECT_TRUE(topo_precedes(dag, "features", "train"));
@@ -62,10 +62,10 @@ TEST(Dag, TopologicalOrderRespectsEdges) {
 }
 
 TEST(Dag, TopologicalOrderIsDeterministicRegardlessOfEdgeOrder) {
-    const auto a = build_ok({"a", "b", "c", "d"},
-                            {{"a", "b"}, {"a", "c"}, {"b", "d"}, {"c", "d"}});
-    const auto b = build_ok({"a", "b", "c", "d"},
-                            {{"c", "d"}, {"b", "d"}, {"a", "c"}, {"a", "b"}});
+    const auto a =
+        build_ok({"a", "b", "c", "d"}, {{"a", "b"}, {"a", "c"}, {"b", "d"}, {"c", "d"}});
+    const auto b =
+        build_ok({"a", "b", "c", "d"}, {{"c", "d"}, {"b", "d"}, {"a", "c"}, {"a", "b"}});
     EXPECT_EQ(a.topological_order(), b.topological_order());
 }
 
@@ -79,10 +79,9 @@ TEST(Dag, InitialDependencyCounts) {
 }
 
 TEST(Dag, TransitiveDependents) {
-    const auto dag = build_ok({"a", "b", "c", "d", "x"},
-                              {{"a", "b"}, {"b", "c"}, {"b", "d"}, {"x", "d"}});
-    EXPECT_EQ(dag.transitive_dependents("a"),
-              (std::vector<std::string>{"b", "c", "d"}));
+    const auto dag =
+        build_ok({"a", "b", "c", "d", "x"}, {{"a", "b"}, {"b", "c"}, {"b", "d"}, {"x", "d"}});
+    EXPECT_EQ(dag.transitive_dependents("a"), (std::vector<std::string>{"b", "c", "d"}));
     EXPECT_TRUE(dag.transitive_dependents("c").empty());
 }
 
@@ -116,8 +115,8 @@ TEST(Dag, DetectsCycleWithDiagnosticPath) {
 }
 
 TEST(Dag, AcyclicDiamondIsNotACycle) {
-    const auto result = Dag::build({"a", "b", "c", "d"},
-                                   {{"a", "b"}, {"a", "c"}, {"b", "d"}, {"c", "d"}});
+    const auto result =
+        Dag::build({"a", "b", "c", "d"}, {{"a", "b"}, {"a", "c"}, {"b", "d"}, {"c", "d"}});
     EXPECT_TRUE(result.ok());
 }
 

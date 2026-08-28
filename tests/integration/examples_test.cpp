@@ -37,8 +37,8 @@ struct ExamplesTest : ::testing::Test {
     engine::Engine::RunReport run(const std::string& name) {
         const auto file = examples / name / "pipeline.json";
         auto loaded = serialization::load_pipeline_from_file(file);
-        EXPECT_TRUE(loaded.ok()) << (loaded.errors.empty() ? file.string()
-                                                           : loaded.errors.front().to_string());
+        EXPECT_TRUE(loaded.ok())
+            << (loaded.errors.empty() ? file.string() : loaded.errors.front().to_string());
         engine::Engine eng(config_for(name));
         return eng.run_pipeline(*loaded.pipeline, {});
     }
@@ -88,7 +88,9 @@ TEST_F(ExamplesTest, RetryPipeline) {
 
 TEST_F(ExamplesTest, CachePipelineReusesResultThenRerunsOnInputChange) {
     const auto data = examples / "cache_pipeline" / "data.in";
-    { std::ofstream(data) << "cache example input v1\n"; }
+    {
+        std::ofstream(data) << "cache example input v1\n";
+    }
 
     const auto first = run("cache_pipeline");
     EXPECT_EQ(first.run.task("build")->state, domain::TaskState::kSucceeded);
@@ -96,7 +98,9 @@ TEST_F(ExamplesTest, CachePipelineReusesResultThenRerunsOnInputChange) {
     const auto second = run("cache_pipeline");
     EXPECT_EQ(second.run.task("build")->state, domain::TaskState::kCached);
 
-    { std::ofstream(data) << "cache example input v2 CHANGED\n"; }
+    {
+        std::ofstream(data) << "cache example input v2 CHANGED\n";
+    }
     const auto third = run("cache_pipeline");
     EXPECT_EQ(third.run.task("build")->state, domain::TaskState::kSucceeded);
 }

@@ -14,7 +14,7 @@ namespace flowforge::artifacts {
 // ---------------------------------------------------------------------------
 struct Artifact {
     std::string logical_name;
-    std::filesystem::path path;   // absolute, resolved
+    std::filesystem::path path;  // absolute, resolved
     bool exists = false;
     std::int64_t size_bytes = 0;
     std::int64_t modified_unix_ms = 0;

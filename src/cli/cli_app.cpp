@@ -210,8 +210,8 @@ int cmd_validate(const Args& args) {
     }
     const bool strict_fail = args.flag("strict") && report.has_warnings();
     if (report.ok() && !strict_fail) {
-        std::printf("ok: '%s' is valid (%zu tasks, %zu dependencies)\n", pipeline->name.c_str(),
-                    pipeline->tasks.size(), pipeline->edges.size());
+        std::printf("ok: '%s' is valid (%zu tasks, %zu dependencies)\n",
+                    pipeline->name.c_str(), pipeline->tasks.size(), pipeline->edges.size());
         return 0;
     }
     std::fprintf(stderr, "pipeline is invalid\n");
@@ -318,11 +318,10 @@ int cmd_runs(const Args& args) {
         return 0;
     }
     std::printf("%-6s  %-20s  %-11s  %-24s  %s\n", "ID", "PIPELINE", "STATE", "STARTED",
-               "DURATION");
+                "DURATION");
     for (const auto& r : runs) {
         std::printf("%-6lld  %-20.20s  %-11s  %-24s  %s\n", static_cast<long long>(r.id),
-                    r.pipeline_name.c_str(),
-                    std::string(domain::to_string(r.state)).c_str(),
+                    r.pipeline_name.c_str(), std::string(domain::to_string(r.state)).c_str(),
                     ts(r.started_at.value_or(r.created_at)).c_str(),
                     duration_str(r.started_at, r.finished_at).c_str());
     }
@@ -348,11 +347,13 @@ int cmd_status(const Args& args) {
     std::printf("created    : %s\n", ts(view->created_at).c_str());
     std::printf("started    : %s\n", ts(view->started_at.value_or(0)).c_str());
     std::printf("finished   : %s\n", ts(view->finished_at.value_or(0)).c_str());
-    std::printf("duration   : %s\n", duration_str(view->started_at, view->finished_at).c_str());
+    std::printf("duration   : %s\n",
+                duration_str(view->started_at, view->finished_at).c_str());
     std::printf("concurrency: %d\n", view->max_concurrency);
     const auto& c = view->counts;
-    std::printf("tasks      : %d total | %d ok, %d cached, %d failed, %d skipped, %d cancelled\n",
-                c.total, c.succeeded, c.cached, c.failed, c.skipped, c.cancelled);
+    std::printf(
+        "tasks      : %d total | %d ok, %d cached, %d failed, %d skipped, %d cancelled\n",
+        c.total, c.succeeded, c.cached, c.failed, c.skipped, c.cancelled);
 
     std::printf("\n%-24s  %-10s  %-8s  %-8s  %s\n", "TASK", "STATE", "ATTEMPTS", "EXIT",
                 "DURATION");

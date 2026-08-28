@@ -19,13 +19,13 @@ void ConsoleReporter::on_run_started(const domain::PipelineRun& run) {
     std::fflush(stdout);
 }
 
-void ConsoleReporter::print_status(std::string_view tag, std::string_view task_id,
+void ConsoleReporter::print_status(std::string_view tag,
+                                   std::string_view task_id,
                                    std::string extra) {
     if (options_.plain) {
         std::printf("%s  %-8.*s %.*s%s%s\n", util::to_iso8601(util::now()).c_str(),
-                    static_cast<int>(tag.size()), tag.data(),
-                    static_cast<int>(task_id.size()), task_id.data(),
-                    extra.empty() ? "" : "  ", extra.c_str());
+                    static_cast<int>(tag.size()), tag.data(), static_cast<int>(task_id.size()),
+                    task_id.data(), extra.empty() ? "" : "  ", extra.c_str());
     } else {
         std::printf("[%-8.*s] %.*s%s%s\n", static_cast<int>(tag.size()), tag.data(),
                     static_cast<int>(task_id.size()), task_id.data(),
@@ -76,7 +76,9 @@ void ConsoleReporter::on_task_state_changed(const domain::TaskRun& task, TaskSta
     }
 }
 
-void ConsoleReporter::on_task_log(std::string_view task_id, int attempt, std::string_view stream,
+void ConsoleReporter::on_task_log(std::string_view task_id,
+                                  int attempt,
+                                  std::string_view stream,
                                   std::string_view line) {
     if (options_.quiet || !options_.show_logs) {
         return;
@@ -84,8 +86,8 @@ void ConsoleReporter::on_task_log(std::string_view task_id, int attempt, std::st
     (void)attempt;
     std::lock_guard<std::mutex> lock(mutex_);
     std::printf("    %.*s | %.*s: %.*s\n", static_cast<int>(task_id.size()), task_id.data(),
-                static_cast<int>(stream.size()), stream.data(),
-                static_cast<int>(line.size()), line.data());
+                static_cast<int>(stream.size()), stream.data(), static_cast<int>(line.size()),
+                line.data());
     std::fflush(stdout);
 }
 
@@ -94,10 +96,9 @@ void ConsoleReporter::on_run_finished(const domain::PipelineRun& run) {
     const auto counts = run.counts();
     std::printf("\nPipeline %s in %s\n", std::string(domain::to_string(run.state)).c_str(),
                 util::format_duration(run.duration_seconds()).c_str());
-    std::printf(
-        "  %d succeeded, %d cached, %d failed, %d skipped, %d cancelled  (of %d)\n",
-        counts.succeeded, counts.cached, counts.failed, counts.skipped, counts.cancelled,
-        counts.total);
+    std::printf("  %d succeeded, %d cached, %d failed, %d skipped, %d cancelled  (of %d)\n",
+                counts.succeeded, counts.cached, counts.failed, counts.skipped,
+                counts.cancelled, counts.total);
     std::fflush(stdout);
 }
 

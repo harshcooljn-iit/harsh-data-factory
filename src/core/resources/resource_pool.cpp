@@ -48,10 +48,9 @@ std::string ResourcePool::describe() const {
     std::lock_guard<std::mutex> lock(mutex_);
     return "cpu " + std::to_string(used_cpu_) + "/" +
            std::to_string(capacity_.total_cpu_cores) + ", mem " +
-           std::to_string(used_memory_mb_) + "/" +
-           std::to_string(capacity_.total_memory_mb) + "MB, gpu " +
-           std::to_string(used_gpu_) + "/" + std::to_string(capacity_.total_gpu_count) +
-           " in use";
+           std::to_string(used_memory_mb_) + "/" + std::to_string(capacity_.total_memory_mb) +
+           "MB, gpu " + std::to_string(used_gpu_) + "/" +
+           std::to_string(capacity_.total_gpu_count) + " in use";
 }
 
 }  // namespace flowforge::resources

@@ -32,11 +32,12 @@ namespace flowforge::scheduler {
 // non-thread-safe resource (like a single SQLite connection) freely.
 // ---------------------------------------------------------------------------
 class SchedulerObserver {
-  public:
+public:
     virtual ~SchedulerObserver() = default;
 
     virtual void on_run_started(const domain::PipelineRun& run) { (void)run; }
-    virtual void on_task_state_changed(const domain::TaskRun& task, domain::TaskState previous) {
+    virtual void on_task_state_changed(const domain::TaskRun& task,
+                                       domain::TaskState previous) {
         (void)task;
         (void)previous;
     }
@@ -45,7 +46,9 @@ class SchedulerObserver {
         (void)task;
         (void)attempt;
     }
-    virtual void on_task_log(std::string_view task_id, int attempt, std::string_view stream,
+    virtual void on_task_log(std::string_view task_id,
+                             int attempt,
+                             std::string_view stream,
                              std::string_view line) {
         (void)task_id;
         (void)attempt;
@@ -58,8 +61,8 @@ class SchedulerObserver {
 struct SchedulerConfig {
     int max_concurrency = 4;
     domain::ResourcePool resource_capacity{};
-    bool verify_outputs = true;      ///< fail a task whose declared outputs are absent
-    bool force_checksums = false;    ///< checksum every artifact regardless of decl
+    bool verify_outputs = true;    ///< fail a task whose declared outputs are absent
+    bool force_checksums = false;  ///< checksum every artifact regardless of decl
 };
 
 struct SchedulerResult {
@@ -86,10 +89,13 @@ struct SchedulerResult {
 //     thread per task.
 // ---------------------------------------------------------------------------
 class Scheduler {
-  public:
-    Scheduler(const domain::PipelineDefinition& pipeline, const dag::Dag& graph,
-              process::ProcessRunner& runner, SchedulerConfig config,
-              cache::CacheStore* cache = nullptr, SchedulerObserver* observer = nullptr,
+public:
+    Scheduler(const domain::PipelineDefinition& pipeline,
+              const dag::Dag& graph,
+              process::ProcessRunner& runner,
+              SchedulerConfig config,
+              cache::CacheStore* cache = nullptr,
+              SchedulerObserver* observer = nullptr,
               const SchedulingPolicy* policy = nullptr);
 
     ~Scheduler();
@@ -106,7 +112,7 @@ class Scheduler {
     /// thread (e.g. a signal-handling thread or another controller).
     void cancel();
 
-  private:
+private:
     struct Event {
         enum class Type { kProcessFinished, kLogLine, kCancel };
         Type type = Type::kCancel;
@@ -137,7 +143,8 @@ class Scheduler {
     [[nodiscard]] StartOutcome try_start(std::size_t node);
     void start_process(std::size_t node, const domain::TaskDefinition& task);
     void handle_process_finished(const Event& event);
-    void record_attempt(std::size_t node, domain::TaskState final_state,
+    void record_attempt(std::size_t node,
+                        domain::TaskState final_state,
                         const domain::TaskResult& result,
                         std::optional<std::int64_t> pid = std::nullopt);
     void on_task_succeeded(std::size_t node, bool from_cache);

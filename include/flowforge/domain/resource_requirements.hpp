@@ -35,7 +35,8 @@ struct ResourcePool {
 /// True if a single task requiring @p req could ever run on @p pool (ignoring
 /// what is currently reserved). A task that can never fit is a validation
 /// error, not something the scheduler should wait forever on.
-[[nodiscard]] bool fits_within(const ResourceRequirements& req, const ResourcePool& pool) noexcept;
+[[nodiscard]] bool fits_within(const ResourceRequirements& req,
+                               const ResourcePool& pool) noexcept;
 
 /// Human-readable summary, e.g. "cpu=2, mem=512MB, gpu=1".
 [[nodiscard]] std::string describe(const ResourceRequirements& req);

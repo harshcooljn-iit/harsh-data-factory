@@ -7,10 +7,9 @@ namespace flowforge::scheduler {
 void ReadyQueue::push(ReadyEntry entry) {
     // Insert keeping entries_ sorted best-first: find the first element the new
     // entry is preferred over.
-    const auto pos = std::find_if(entries_.begin(), entries_.end(),
-                                  [&](const ReadyEntry& existing) {
-                                      return policy_->prefer(entry, existing);
-                                  });
+    const auto pos = std::find_if(
+        entries_.begin(), entries_.end(),
+        [&](const ReadyEntry& existing) { return policy_->prefer(entry, existing); });
     entries_.insert(pos, std::move(entry));
 }
 
@@ -27,9 +26,8 @@ void ReadyQueue::erase_at(std::size_t idx) {
 }
 
 bool ReadyQueue::remove(std::string_view task_id) {
-    const auto it = std::find_if(entries_.begin(), entries_.end(), [&](const ReadyEntry& e) {
-        return e.task_id == task_id;
-    });
+    const auto it = std::find_if(entries_.begin(), entries_.end(),
+                                 [&](const ReadyEntry& e) { return e.task_id == task_id; });
     if (it == entries_.end()) {
         return false;
     }

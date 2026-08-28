@@ -16,7 +16,7 @@ namespace flowforge::util {
 // that. Streaming API so large files hash without being read into memory.
 // ---------------------------------------------------------------------------
 class Sha256 {
-  public:
+public:
     Sha256() noexcept { reset(); }
 
     void reset() noexcept;
@@ -27,7 +27,7 @@ class Sha256 {
     /// reset afterwards and can be reused.
     [[nodiscard]] std::string hex_digest() noexcept;
 
-  private:
+private:
     void process_block(const std::uint8_t* block) noexcept;
 
     std::array<std::uint32_t, 8> state_{};

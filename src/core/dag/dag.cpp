@@ -88,8 +88,9 @@ DagBuildResult Dag::build(std::vector<std::string> nodes,
         const auto [it, inserted] = index.emplace(dag.nodes_[i], i);
         (void)it;
         if (!inserted) {
-            result.errors.push_back(
-                {DagError::Code::kDuplicateNode, "duplicate task id '" + dag.nodes_[i] + "'", {}});
+            result.errors.push_back({DagError::Code::kDuplicateNode,
+                                     "duplicate task id '" + dag.nodes_[i] + "'",
+                                     {}});
         }
     }
     if (!result.errors.empty()) {
@@ -107,17 +108,20 @@ DagBuildResult Dag::build(std::vector<std::string> nodes,
         const auto tit = index.find(to);
         if (fit == index.end()) {
             result.errors.push_back({DagError::Code::kUnknownEdgeEndpoint,
-                                     "dependency references unknown task '" + from + "'", {}});
+                                     "dependency references unknown task '" + from + "'",
+                                     {}});
             continue;
         }
         if (tit == index.end()) {
             result.errors.push_back({DagError::Code::kUnknownEdgeEndpoint,
-                                     "dependency references unknown task '" + to + "'", {}});
+                                     "dependency references unknown task '" + to + "'",
+                                     {}});
             continue;
         }
         if (fit->second == tit->second) {
             result.errors.push_back({DagError::Code::kSelfDependency,
-                                     "task '" + from + "' depends on itself", {}});
+                                     "task '" + from + "' depends on itself",
+                                     {}});
             continue;
         }
         const auto key = (static_cast<std::uint64_t>(fit->second) << 32) |
@@ -205,7 +209,9 @@ DagBuildResult Dag::build(std::vector<std::string> nodes,
     return result;
 }
 
-bool Dag::contains(std::string_view id) const noexcept { return index_of(id).has_value(); }
+bool Dag::contains(std::string_view id) const noexcept {
+    return index_of(id).has_value();
+}
 
 std::optional<std::size_t> Dag::index_of(std::string_view id) const noexcept {
     const auto it = index_.find(std::string(id));

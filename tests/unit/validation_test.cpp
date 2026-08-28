@@ -35,7 +35,8 @@ TEST(Validation, AcceptsAWellFormedPipeline) {
     p.tasks = {exec_task("a"), exec_task("b")};
     p.edges = {{"a", "b"}};
     const auto report = validate_pipeline(p, no_exec_check());
-    EXPECT_TRUE(report.ok()) << (report.issues.empty() ? "" : report.issues.front().to_string());
+    EXPECT_TRUE(report.ok()) << (report.issues.empty() ? ""
+                                                       : report.issues.front().to_string());
 }
 
 TEST(Validation, FlagsDuplicateTaskIds) {

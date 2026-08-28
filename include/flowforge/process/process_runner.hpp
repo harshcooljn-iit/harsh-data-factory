@@ -35,7 +35,7 @@ struct ProcessCallbacks {
 // interface; nothing above it includes <unistd.h>.
 // ---------------------------------------------------------------------------
 class ProcessRunner {
-  public:
+public:
     virtual ~ProcessRunner() = default;
 
     /// Launch `spec`. Returns kInvalidHandle only if the request could not be
@@ -57,7 +57,9 @@ class ProcessRunner {
 // Blocking convenience wrapper for tests and simple callers. Runs `spec` to
 // completion, appending captured output to `out` / `err` when non-null.
 // ---------------------------------------------------------------------------
-ProcessResult run_blocking(ProcessRunner& runner, const ProcessSpec& spec,
-                           std::string* out = nullptr, std::string* err = nullptr);
+ProcessResult run_blocking(ProcessRunner& runner,
+                           const ProcessSpec& spec,
+                           std::string* out = nullptr,
+                           std::string* err = nullptr);
 
 }  // namespace flowforge::process

@@ -24,7 +24,7 @@ struct ReadyEntry {
 // Replaceable; the engine installs DefaultSchedulingPolicy unless overridden.
 // ---------------------------------------------------------------------------
 class SchedulingPolicy {
-  public:
+public:
     virtual ~SchedulingPolicy() = default;
 
     /// True if @p a should be launched before @p b. Must be a strict weak
@@ -38,7 +38,7 @@ class SchedulingPolicy {
 // Default: higher priority first, then earlier readiness, then task id
 // (lexicographic) as a deterministic final tie-break.
 class DefaultSchedulingPolicy final : public SchedulingPolicy {
-  public:
+public:
     [[nodiscard]] bool prefer(const ReadyEntry& a, const ReadyEntry& b) const override;
     [[nodiscard]] std::string name() const override { return "priority/fifo/id"; }
 };

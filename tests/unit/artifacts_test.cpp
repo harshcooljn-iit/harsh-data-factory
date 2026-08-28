@@ -17,7 +17,8 @@ struct ArtifactsTest : ::testing::Test {
     fs::path root;
     void SetUp() override {
         root = fs::temp_directory_path() /
-               ("ff_artifacts_" + std::to_string(::testing::UnitTest::GetInstance()->random_seed()) +
+               ("ff_artifacts_" +
+                std::to_string(::testing::UnitTest::GetInstance()->random_seed()) +
                 std::to_string(reinterpret_cast<std::uintptr_t>(this)));
         fs::create_directories(root);
     }

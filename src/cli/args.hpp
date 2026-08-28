@@ -15,7 +15,7 @@ namespace flowforge::cli {
 // FlowForge does not need a full getopt.
 // ---------------------------------------------------------------------------
 class Args {
-  public:
+public:
     Args(int argc, char** argv, int start);
 
     [[nodiscard]] const std::vector<std::string>& positionals() const noexcept {
@@ -31,7 +31,7 @@ class Args {
     /// reject typos instead of silently ignoring them.
     [[nodiscard]] std::vector<std::string> unconsumed() const;
 
-  private:
+private:
     std::vector<std::string> positionals_;
     std::unordered_map<std::string, std::string> options_;
     mutable std::unordered_set<std::string> consumed_;

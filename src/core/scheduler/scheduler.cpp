@@ -13,15 +13,20 @@ using domain::TaskState;
 using util::now;
 
 namespace {
-std::int64_t ms(util::TimePoint tp) { return util::to_unix_millis(tp); }
+std::int64_t ms(util::TimePoint tp) {
+    return util::to_unix_millis(tp);
+}
 }  // namespace
 
 // ===========================================================================
 // Construction
 // ===========================================================================
-Scheduler::Scheduler(const domain::PipelineDefinition& pipeline, const dag::Dag& graph,
-                     process::ProcessRunner& runner, SchedulerConfig config,
-                     cache::CacheStore* cache, SchedulerObserver* observer,
+Scheduler::Scheduler(const domain::PipelineDefinition& pipeline,
+                     const dag::Dag& graph,
+                     process::ProcessRunner& runner,
+                     SchedulerConfig config,
+                     cache::CacheStore* cache,
+                     SchedulerObserver* observer,
                      const SchedulingPolicy* policy)
     : pipeline_(pipeline),
       graph_(graph),
@@ -33,7 +38,8 @@ Scheduler::Scheduler(const domain::PipelineDefinition& pipeline, const dag::Dag&
       policy_(policy != nullptr ? policy : owned_policy_.get()),
       ready_(*policy_),
       resource_pool_(config.resource_capacity),
-      artifacts_(pipeline.base_directory.empty() ? std::string(".") : pipeline.base_directory) {
+      artifacts_(pipeline.base_directory.empty() ? std::string(".")
+                                                 : pipeline.base_directory) {
     if (config_.max_concurrency < 1) {
         config_.max_concurrency = 1;
     }
@@ -306,10 +312,12 @@ void Scheduler::start_process(std::size_t node, const domain::TaskDefinition& ta
 
     process::ProcessCallbacks cb;
     cb.on_stdout = [this, node, attempt](std::string_view line) {
-        push_event(Event{Event::Type::kLogLine, node, {}, "stdout", std::string(line), attempt});
+        push_event(
+            Event{Event::Type::kLogLine, node, {}, "stdout", std::string(line), attempt});
     };
     cb.on_stderr = [this, node, attempt](std::string_view line) {
-        push_event(Event{Event::Type::kLogLine, node, {}, "stderr", std::string(line), attempt});
+        push_event(
+            Event{Event::Type::kLogLine, node, {}, "stderr", std::string(line), attempt});
     };
     cb.on_exit = [this, node, attempt](const process::ProcessResult& result) {
         Event ev{Event::Type::kProcessFinished, node, result, {}, {}, attempt};
@@ -529,7 +537,8 @@ void Scheduler::mark_state(std::size_t node, TaskState next) {
     }
 }
 
-void Scheduler::record_attempt(std::size_t node, TaskState final_state,
+void Scheduler::record_attempt(std::size_t node,
+                               TaskState final_state,
                                const domain::TaskResult& result,
                                std::optional<std::int64_t> pid) {
     NodeState& ns = nodes_[node];

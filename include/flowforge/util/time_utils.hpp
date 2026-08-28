@@ -21,7 +21,9 @@ using TimePoint = Clock::time_point;
 [[nodiscard]] std::string to_iso8601(TimePoint tp);
 
 /// Current wall-clock time.
-[[nodiscard]] inline TimePoint now() noexcept { return Clock::now(); }
+[[nodiscard]] inline TimePoint now() noexcept {
+    return Clock::now();
+}
 
 /// Seconds elapsed between two time points (never negative).
 [[nodiscard]] double seconds_between(TimePoint start, TimePoint end) noexcept;

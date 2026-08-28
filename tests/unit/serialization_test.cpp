@@ -35,7 +35,8 @@ constexpr const char* kSample = R"JSON({
 
 TEST(Serialization, ParsesValidDocument) {
     const auto result = load_pipeline_from_json(kSample, "/tmp/base");
-    ASSERT_TRUE(result.ok()) << (result.errors.empty() ? "" : result.errors.front().to_string());
+    ASSERT_TRUE(result.ok()) << (result.errors.empty() ? ""
+                                                       : result.errors.front().to_string());
     const auto& p = *result.pipeline;
     EXPECT_EQ(p.name, "ml_pipeline");
     EXPECT_EQ(p.max_concurrency, 3);

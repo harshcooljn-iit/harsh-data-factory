@@ -20,7 +20,7 @@ namespace flowforge::resources {
 // negligible -- calls happen only at task start/finish, not in a hot loop.
 // ---------------------------------------------------------------------------
 class ResourcePool {
-  public:
+public:
     explicit ResourcePool(domain::ResourcePool capacity);
 
     /// Atomically reserve @p req if it currently fits. Returns false and
@@ -40,7 +40,7 @@ class ResourcePool {
     /// e.g. "cpu 2/8, mem 512/16384MB, gpu 0/1 in use".
     [[nodiscard]] std::string describe() const;
 
-  private:
+private:
     mutable std::mutex mutex_;
     domain::ResourcePool capacity_;
     int used_cpu_ = 0;

@@ -63,7 +63,7 @@ bool output_still_valid(const CachedArtifact& snap) {
 }  // namespace
 
 std::optional<CachedOutcome> CacheStore::lookup(const std::string& cache_key,
-                                               std::int64_t now_ms) {
+                                                std::int64_t now_ms) {
     if (!enabled_) {
         return std::nullopt;
     }
@@ -89,8 +89,10 @@ std::optional<CachedOutcome> CacheStore::lookup(const std::string& cache_key,
     return outcome;
 }
 
-void CacheStore::store(const std::string& cache_key, const std::string& task_id,
-                       const CachedOutcome& outcome, std::int64_t now_ms) {
+void CacheStore::store(const std::string& cache_key,
+                       const std::string& task_id,
+                       const CachedOutcome& outcome,
+                       std::int64_t now_ms) {
     if (!enabled_ || outcome.exit_code != 0) {
         return;
     }
