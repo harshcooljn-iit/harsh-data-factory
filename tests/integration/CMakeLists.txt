@@ -11,3 +11,10 @@ flowforge_add_test(NAME engine_test
     SOURCES engine_test.cpp
     LABELS integration)
 add_dependencies(engine_test flowforge_helpers)
+
+flowforge_add_test(NAME cli_test
+    SOURCES cli_test.cpp
+    LABELS integration)
+add_dependencies(cli_test flowforge)
+target_compile_definitions(cli_test PRIVATE
+    FLOWFORGE_CLI_BIN="$<TARGET_FILE:flowforge>")

@@ -329,6 +329,7 @@ domain::TaskResult Scheduler::classify(const process::ProcessResult& pr) const {
         case process::ProcessOutcome::kExited:
             if (pr.exit_code == 0) {
                 r.kind = domain::ResultKind::kSucceeded;
+                r.exit_code = 0;
             } else {
                 r.kind = domain::ResultKind::kFailedExit;
                 r.exit_code = pr.exit_code;

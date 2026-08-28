@@ -1,14 +1,15 @@
 # ---------------------------------------------------------------------------
-# flowforge — the command line front end.
+# flowforge -- the command line front end.
 #
-# This target is a thin presentation layer over FlowForge::core. It must not
-# contain scheduling / execution logic: everything testable lives in the core
-# library so the CLI and the tests exercise the same code paths. Sources are
-# added as commands land.
+# A thin presentation layer over FlowForge::core. No scheduling / execution
+# logic lives here: the CLI and the tests drive the same engine library.
 # ---------------------------------------------------------------------------
 
 add_executable(flowforge
-    main.cpp)
+    main.cpp
+    cli_app.cpp
+    args.cpp
+    console_reporter.cpp)
 
 target_include_directories(flowforge PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -19,3 +20,4 @@ target_link_libraries(flowforge
         FlowForge::warnings)
 
 set_target_properties(flowforge PROPERTIES OUTPUT_NAME "flowforge")
+# Install rules for `flowforge` live in the top-level CMakeLists.
