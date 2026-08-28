@@ -13,7 +13,14 @@ configure_file(
 
 add_library(flowforge_core STATIC
     util/string_utils.cpp
-    util/time_utils.cpp)
+    util/time_utils.cpp
+
+    domain/enums.cpp
+    domain/retry_policy.cpp
+    domain/resource_requirements.cpp
+    domain/task_definition.cpp
+    domain/pipeline_definition.cpp
+    domain/run_state.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
