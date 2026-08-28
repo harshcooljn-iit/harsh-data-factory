@@ -22,10 +22,11 @@ Database::Database(const std::string& path) {
     if (rc != SQLITE_OK) {
         sqlite3* tmp = db_;
         db_ = nullptr;
-        const char* msg = tmp != nullptr ? sqlite3_errmsg(tmp) : sqlite3_errstr(rc);
-        DatabaseError err("open database", msg != nullptr ? msg : "unknown", rc);
+        const char* raw = tmp != nullptr ? sqlite3_errmsg(tmp) : sqlite3_errstr(rc);
+        // Copy the message out before closing: `raw` points into `tmp`.
+        const std::string detail = raw != nullptr ? raw : "unknown";
         sqlite3_close(tmp);
-        throw err;
+        throw DatabaseError("open database", detail, rc);
     }
     sqlite3_busy_timeout(db_, 5000);
     exec("PRAGMA foreign_keys = ON;");

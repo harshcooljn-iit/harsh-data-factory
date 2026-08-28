@@ -163,7 +163,7 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
         for (const auto& e : pipeline.edges) {
             edges.emplace_back(e.from, e.to);
         }
-        auto built = dag::Dag::build(std::move(nodes), std::move(edges));
+        auto built = dag::Dag::build(std::move(nodes), edges);
         if (!built.ok()) {
             for (const auto& de : built.errors) {
                 sink.error("", "dependencies", de.message);

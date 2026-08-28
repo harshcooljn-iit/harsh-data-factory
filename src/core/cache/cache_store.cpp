@@ -2,12 +2,9 @@
 
 #include <nlohmann/json.hpp>
 
-#include <filesystem>
-
 #include "flowforge/artifacts/artifact.hpp"
 #include "flowforge/storage/repositories.hpp"
 
-namespace fs = std::filesystem;
 using nlohmann::json;
 
 namespace flowforge::cache {

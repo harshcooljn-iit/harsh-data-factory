@@ -53,7 +53,7 @@ public:
     // DagBuildResult follows the class.
     [[nodiscard]] static DagBuildResult build(
         std::vector<std::string> nodes,
-        std::vector<std::pair<std::string, std::string>> edges);
+        const std::vector<std::pair<std::string, std::string>>& edges);
 
     [[nodiscard]] std::size_t size() const noexcept { return nodes_.size(); }
     [[nodiscard]] bool empty() const noexcept { return nodes_.empty(); }

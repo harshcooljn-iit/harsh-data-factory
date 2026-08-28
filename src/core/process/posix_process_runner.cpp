@@ -33,8 +33,8 @@ namespace {
 using util::Clock;
 using util::TimePoint;
 
-constexpr std::size_t kReadChunk = 64 * 1024;
-constexpr std::size_t kMaxPartialLine = 1 * 1024 * 1024;
+constexpr std::size_t kReadChunk = std::size_t{64} * 1024;
+constexpr std::size_t kMaxPartialLine = std::size_t{1} * 1024 * 1024;
 
 ::pollfd make_pollfd(int fd) {
     ::pollfd pfd{};

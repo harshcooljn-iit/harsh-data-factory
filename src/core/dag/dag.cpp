@@ -56,8 +56,10 @@ std::vector<std::size_t> find_cycle(const std::vector<std::vector<std::size_t>>&
                 } else if (colour[next] == kGrey) {
                     // Back edge node -> next: reconstruct next ... node ... next.
                     std::vector<std::size_t> cycle;
-                    for (std::size_t cur = node; cur != next; cur = parent[cur]) {
+                    std::size_t cur = node;
+                    while (cur != next) {
                         cycle.push_back(cur);
+                        cur = parent[cur];
                     }
                     cycle.push_back(next);
                     std::reverse(cycle.begin(), cycle.end());
@@ -76,7 +78,7 @@ std::vector<std::size_t> find_cycle(const std::vector<std::vector<std::size_t>>&
 }  // namespace
 
 DagBuildResult Dag::build(std::vector<std::string> nodes,
-                          std::vector<std::pair<std::string, std::string>> edges) {
+                          const std::vector<std::pair<std::string, std::string>>& edges) {
     DagBuildResult result;
     Dag dag;
     dag.nodes_ = std::move(nodes);

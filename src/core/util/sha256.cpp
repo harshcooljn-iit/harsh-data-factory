@@ -134,7 +134,7 @@ std::optional<std::string> sha256_file(const std::filesystem::path& path) {
         return std::nullopt;
     }
     Sha256 h;
-    std::array<std::uint8_t, 64 * 1024> chunk{};
+    std::array<std::uint8_t, std::size_t{64} * 1024> chunk{};
     std::size_t n = 0;
     while ((n = std::fread(chunk.data(), 1, chunk.size(), fp)) > 0) {
         h.update(chunk.data(), n);

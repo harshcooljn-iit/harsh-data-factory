@@ -22,5 +22,14 @@ if ! command -v "$ct" >/dev/null 2>&1; then
     exit 1
 fi
 
-mapfile -t files < <(find src/core -name '*.cpp' -type f | sort)
-"$ct" -p "$builddir" "${files[@]}"
+extra_args=()
+if [[ "$(uname -s)" == "Darwin" ]] && command -v xcrun >/dev/null 2>&1; then
+    # Homebrew clang-tidy does not know about the macOS SDK by default.
+    extra_args+=(--extra-arg=-isysroot --extra-arg="$(xcrun --show-sdk-path)")
+fi
+
+status=0
+while IFS= read -r f; do
+    "$ct" -p "$builddir" "${extra_args[@]+"${extra_args[@]}"}" "$f" || status=1
+done < <(find src/core -name '*.cpp' -type f | sort)
+exit "$status"

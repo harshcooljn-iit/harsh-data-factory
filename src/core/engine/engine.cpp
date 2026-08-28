@@ -152,28 +152,33 @@ public:
         }
     }
     void on_run_started(const domain::PipelineRun& r) override {
-        for (auto* s : sinks_)
+        for (auto* s : sinks_) {
             s->on_run_started(r);
+        }
     }
     void on_task_state_changed(const domain::TaskRun& t, TaskState p) override {
-        for (auto* s : sinks_)
+        for (auto* s : sinks_) {
             s->on_task_state_changed(t, p);
+        }
     }
     void on_task_attempt_recorded(const domain::TaskRun& t,
                                   const domain::TaskAttempt& a) override {
-        for (auto* s : sinks_)
+        for (auto* s : sinks_) {
             s->on_task_attempt_recorded(t, a);
+        }
     }
     void on_task_log(std::string_view id,
                      int attempt,
                      std::string_view stream,
                      std::string_view line) override {
-        for (auto* s : sinks_)
+        for (auto* s : sinks_) {
             s->on_task_log(id, attempt, stream, line);
+        }
     }
     void on_run_finished(const domain::PipelineRun& r) override {
-        for (auto* s : sinks_)
+        for (auto* s : sinks_) {
             s->on_run_finished(r);
+        }
     }
 
 private:
@@ -266,7 +271,7 @@ Engine::RunReport Engine::run_pipeline(const domain::PipelineDefinition& pipelin
     for (const auto& e : pipeline.edges) {
         edges.emplace_back(e.from, e.to);
     }
-    auto built = dag::Dag::build(std::move(nodes), std::move(edges));
+    auto built = dag::Dag::build(std::move(nodes), edges);
     if (!built.ok()) {
         for (const auto& de : built.errors) {
             report.validation.issues.push_back(

@@ -1,6 +1,7 @@
 # Build output
 /build/
 /out/
+/_install/
 /cmake-build-*/
 *.o
 *.obj

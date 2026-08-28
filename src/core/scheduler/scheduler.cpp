@@ -488,10 +488,9 @@ void Scheduler::skip_downstream(std::size_t node) {
 void Scheduler::begin_cancel() {
     cancelling_ = true;
 
-    for (std::size_t i = 0; i < nodes_.size(); ++i) {
-        if (nodes_[i].state == TaskState::kRunning &&
-            nodes_[i].handle != process::kInvalidHandle) {
-            runner_.request_terminate(nodes_[i].handle, /*as_cancellation=*/true);
+    for (const NodeState& ns : nodes_) {
+        if (ns.state == TaskState::kRunning && ns.handle != process::kInvalidHandle) {
+            runner_.request_terminate(ns.handle, /*as_cancellation=*/true);
         }
     }
 
