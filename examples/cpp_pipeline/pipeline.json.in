@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "name": "cpp_pipeline",
+  "description": "Native C++ tasks: generate a number series, then bucket it into a histogram.",
+  "tasks": [
+    {
+      "id": "generate",
+      "name": "Generate numbers",
+      "type": "executable",
+      "executable": "@FF_BIN@/ex_numbers",
+      "arguments": ["numbers.txt", "500"],
+      "working_directory": "@GEN@",
+      "outputs": [{ "name": "numbers", "path": "numbers.txt" }]
+    },
+    {
+      "id": "histogram",
+      "name": "Bucket into a histogram",
+      "type": "executable",
+      "executable": "@FF_BIN@/ex_histogram",
+      "arguments": ["numbers.txt", "histogram.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "numbers", "path": "numbers.txt" }],
+      "outputs": [{ "name": "histogram", "path": "histogram.txt" }]
+    }
+  ],
+  "dependencies": [{ "from": "generate", "to": "histogram" }]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "hello",
+  "description": "A single executable task that prints a message and writes greeting.txt.",
+  "tasks": [
+    {
+      "id": "greet",
+      "name": "Print a greeting",
+      "type": "executable",
+      "executable": "@FF_BIN@/ex_greeter",
+      "arguments": ["FlowForge"],
+      "working_directory": "@GEN@",
+      "outputs": [{ "name": "greeting", "path": "greeting.txt" }]
+    }
+  ],
+  "dependencies": []
+}

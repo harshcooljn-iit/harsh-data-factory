@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "name": "retry_pipeline",
+  "description": "A task that fails its first two attempts and succeeds on the third.",
+  "tasks": [
+    {
+      "id": "flaky",
+      "name": "Flaky task",
+      "type": "executable",
+      "executable": "@FF_BIN@/ex_flaky_counter",
+      "arguments": ["@GEN@/attempts.count", "3"],
+      "working_directory": "@GEN@",
+      "retry": { "max_retries": 3, "base_delay_ms": 200, "backoff_multiplier": 2.0 }
+    }
+  ],
+  "dependencies": []
+}

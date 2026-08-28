@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "name": "failure_pipeline",
+  "description": "One branch fails; its child is skipped; the independent branch still succeeds.",
+  "tasks": [
+    {
+      "id": "start",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "echo starting"],
+      "working_directory": "@GEN@"
+    },
+    {
+      "id": "good_branch",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "echo this branch is fine > good.txt"],
+      "working_directory": "@GEN@",
+      "outputs": [{ "name": "good", "path": "good.txt" }]
+    },
+    {
+      "id": "bad_branch",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "echo failing on purpose 1>&2; exit 1"],
+      "working_directory": "@GEN@"
+    },
+    {
+      "id": "bad_child",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "echo should never run"],
+      "working_directory": "@GEN@"
+    }
+  ],
+  "dependencies": [
+    { "from": "start", "to": "good_branch" },
+    { "from": "start", "to": "bad_branch" },
+    { "from": "bad_branch", "to": "bad_child" }
+  ]
+}

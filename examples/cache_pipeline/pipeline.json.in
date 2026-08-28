@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "cache_pipeline",
+  "description": "Second run reuses the cached result; changing the input forces re-execution.",
+  "tasks": [
+    {
+      "id": "build",
+      "name": "Expensive build step",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "sleep 1; sha256sum data.in > artifact.out 2>/dev/null || shasum -a 256 data.in > artifact.out"],
+      "working_directory": "@GEN@",
+      "cache": true,
+      "inputs": [{ "name": "data", "path": "data.in", "checksum": true }],
+      "outputs": [{ "name": "artifact", "path": "artifact.out", "checksum": true }]
+    }
+  ],
+  "dependencies": []
+}

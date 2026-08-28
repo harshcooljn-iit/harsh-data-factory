@@ -18,3 +18,12 @@ flowforge_add_test(NAME cli_test
 add_dependencies(cli_test flowforge)
 target_compile_definitions(cli_test PRIVATE
     FLOWFORGE_CLI_BIN="$<TARGET_FILE:flowforge>")
+
+if(TARGET flowforge_examples)
+    flowforge_add_test(NAME examples_test
+        SOURCES examples_test.cpp
+        LABELS integration)
+    add_dependencies(examples_test flowforge_examples)
+    target_compile_definitions(examples_test PRIVATE
+        FLOWFORGE_EXAMPLES_DIR="${CMAKE_BINARY_DIR}/examples")
+endif()

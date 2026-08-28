@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "name": "python_pipeline",
+  "description": "Two Python tasks: clean a CSV, then summarise it. Data flows through files.",
+  "defaults": { "python_interpreter": "@FF_PYTHON@" },
+  "tasks": [
+    {
+      "id": "clean",
+      "name": "Clean input CSV",
+      "type": "python",
+      "script": "@GEN@/clean.py",
+      "arguments": ["input.csv", "clean.csv"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "raw", "path": "input.csv" }],
+      "outputs": [{ "name": "clean", "path": "clean.csv" }]
+    },
+    {
+      "id": "summarize",
+      "name": "Summarise cleaned data",
+      "type": "python",
+      "script": "@GEN@/summarize.py",
+      "arguments": ["clean.csv", "summary.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "clean", "path": "clean.csv" }],
+      "outputs": [{ "name": "summary", "path": "summary.txt" }]
+    }
+  ],
+  "dependencies": [{ "from": "clean", "to": "summarize" }]
+}

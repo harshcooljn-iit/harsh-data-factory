@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "name": "parallel_pipeline",
+  "description": "One task fans out to three independent workers that then join.",
+  "tasks": [
+    {
+      "id": "split",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "printf 'seed\\n' > seed.txt"],
+      "working_directory": "@GEN@",
+      "outputs": [{ "name": "seed", "path": "seed.txt" }]
+    },
+    {
+      "id": "worker_a",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "sleep 1; wc -c < seed.txt > a.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "seed", "path": "seed.txt" }],
+      "outputs": [{ "name": "a", "path": "a.txt" }]
+    },
+    {
+      "id": "worker_b",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "sleep 1; wc -l < seed.txt > b.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "seed", "path": "seed.txt" }],
+      "outputs": [{ "name": "b", "path": "b.txt" }]
+    },
+    {
+      "id": "worker_c",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "sleep 1; cat seed.txt seed.txt > c.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [{ "name": "seed", "path": "seed.txt" }],
+      "outputs": [{ "name": "c", "path": "c.txt" }]
+    },
+    {
+      "id": "join",
+      "type": "executable",
+      "executable": "/bin/sh",
+      "arguments": ["-c", "cat a.txt b.txt c.txt > result.txt"],
+      "working_directory": "@GEN@",
+      "inputs": [
+        { "name": "a", "path": "a.txt" },
+        { "name": "b", "path": "b.txt" },
+        { "name": "c", "path": "c.txt" }
+      ],
+      "outputs": [{ "name": "result", "path": "result.txt" }]
+    }
+  ],
+  "dependencies": [
+    { "from": "split", "to": "worker_a" },
+    { "from": "split", "to": "worker_b" },
+    { "from": "split", "to": "worker_c" },
+    { "from": "worker_a", "to": "join" },
+    { "from": "worker_b", "to": "join" },
+    { "from": "worker_c", "to": "join" }
+  ]
+}
