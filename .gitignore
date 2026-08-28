@@ -1,0 +1,37 @@
+# Build output
+/build/
+/out/
+/cmake-build-*/
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+
+# vcpkg
+/vcpkg_installed/
+/.vcpkg-root
+
+# Runtime / local state
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+/.flowforge/
+*.log
+
+# Editor / IDE
+.vscode/
+.idea/
+.cache/
+compile_commands.json
+*.swp
+.DS_Store
+
+# Test / example scratch
+/examples/**/output/
+/examples/**/_run/
+/tmp/
+
+# Original build specification (kept locally, not part of the deliverable)
+/claude-code/

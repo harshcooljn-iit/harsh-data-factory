@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "flowforge",
+  "version": "0.1.0",
+  "description": "Local-first DAG pipeline orchestration engine",
+  "homepage": "https://github.com/flowforge/flowforge",
+  "license": "MIT",
+  "builtin-baseline": "ca18538bf88b72c41056b866695de13966ed6889",
+  "dependencies": [
+    "nlohmann-json",
+    "spdlog",
+    "sqlite3",
+    {
+      "name": "gtest",
+      "default-features": false
+    }
+  ],
+  "overrides": []
+}
