@@ -31,7 +31,11 @@ add_library(flowforge_core STATIC
     resources/resource_pool.cpp
 
     artifacts/artifact.cpp
-    artifacts/artifact_manager.cpp)
+    artifacts/artifact_manager.cpp
+
+    validation/pipeline_validator.cpp
+
+    serialization/pipeline_document.cpp)
 
 add_library(FlowForge::core ALIAS flowforge_core)
 
