@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "name": "sales_report",
+  "description": "Merge monthly CSVs, clean them, compute stats with a native binary, build a report.",
+  "defaults": { "python_interpreter": "python3", "cache": true },
+  "tasks": [
+    {
+      "id": "setup", "name": "Create output directories",
+      "type": "executable", "executable": "/bin/mkdir",
+      "arguments": ["-p", "bin", "work", "out"],
+      "cache": false
+    },
+    {
+      "id": "build_stats", "name": "Compile src/stats.cpp",
+      "type": "executable", "executable": "/usr/bin/c++",
+      "arguments": ["-O2", "-std=c++17", "src/stats.cpp", "-o", "bin/stats"],
+      "inputs":  [{ "name": "source", "path": "src/stats.cpp" }],
+      "outputs": [{ "name": "binary", "path": "bin/stats" }],
+      "depends_on": ["setup"]
+    },
+    {
+      "id": "merge", "name": "Merge monthly CSVs",
+      "type": "python", "script": "src/merge.py",
+      "arguments": ["work/combined.csv"],
+      "inputs": [
+        { "name": "january",  "path": "data/january.csv" },
+        { "name": "february", "path": "data/february.csv" }
+      ],
+      "outputs": [{ "name": "combined", "path": "work/combined.csv" }],
+      "depends_on": ["setup"]
+    },
+    {
+      "id": "clean", "name": "Drop invalid rows",
+      "type": "python", "script": "src/clean.py",
+      "arguments": ["work/combined.csv", "work/clean.csv"],
+      "inputs":  [{ "name": "combined", "path": "work/combined.csv" }],
+      "outputs": [{ "name": "clean",    "path": "work/clean.csv" }],
+      "depends_on": ["merge"]
+    },
+    {
+      "id": "stats", "name": "Summary statistics (native)",
+      "type": "executable", "executable": "bin/stats",
+      "arguments": ["work/clean.csv", "work/stats.txt"],
+      "inputs":  [{ "name": "clean", "path": "work/clean.csv" }],
+      "outputs": [{ "name": "stats", "path": "work/stats.txt" }],
+      "depends_on": ["clean", "build_stats"]
+    },
+    {
+      "id": "report", "name": "Build the report",
+      "type": "python", "script": "src/report.py",
+      "arguments": ["work/clean.csv", "work/stats.txt", "out/report.txt"],
+      "inputs": [
+        { "name": "clean", "path": "work/clean.csv" },
+        { "name": "stats", "path": "work/stats.txt" }
+      ],
+      "outputs": [{ "name": "report", "path": "out/report.txt" }],
+      "depends_on": ["clean", "stats"]
+    }
+  ],
+  "dependencies": []
+}
