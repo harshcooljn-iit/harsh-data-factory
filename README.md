@@ -164,7 +164,12 @@ flowforge version
 ```
 
 Installs the `flowforge` binary, the public headers and the `flowforge_core`
-library. `cpack -G TGZ` from the build dir produces a tarball.
+library under the prefix you choose (`/usr/local` = system-wide, `$HOME/.local`
+= just your user). FlowForge writes no dotfiles, no launchd agent and no global
+config; per-project state lives in a `.flowforge/` folder next to where you run
+it. `cpack -G TGZ` from the build dir produces a tarball. See
+[the user guide](docs/user-guide.md#16-where-flowforge-is-installed-and-how-to-remove-it)
+for exactly what lands where and how to uninstall.
 
 ## Writing a pipeline
 

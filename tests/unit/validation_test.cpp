@@ -129,6 +129,58 @@ TEST(Validation, WarnsOnDuplicateArtifactName) {
     EXPECT_TRUE(report.has_warnings());
 }
 
+TEST(Validation, AllowsExecutableProducedByAnUpstreamTask) {
+    // A compile step emits bin/tool; a later task runs bin/tool.
+    auto p = base_pipeline();
+    TaskDefinition build;
+    build.id = "build";
+    build.name = "build";
+    build.type = TaskType::kExecutable;
+    build.program = "/bin/echo";  // stand-in for a compiler
+    build.outputs = {{"tool", "bin/tool", false}};
+
+    TaskDefinition use;
+    use.id = "use";
+    use.name = "use";
+    use.type = TaskType::kExecutable;
+    use.program = "bin/tool";  // does not exist yet at validate time
+
+    p.tasks = {build, use};
+    p.edges = {{"build", "use"}};
+
+    ValidationOptions opts;
+    opts.check_executables = true;  // would normally flag bin/tool as missing
+    const auto report = validate_pipeline(p, opts);
+    for (const auto& i : report.errors()) {
+        EXPECT_NE(i.field, "executable") << i.to_string();
+    }
+    EXPECT_TRUE(report.ok());
+}
+
+TEST(Validation, StillFlagsMissingExecutableNotProducedByAnAncestor) {
+    // 'use' does not depend on 'build', so bin/tool won't exist in time.
+    auto p = base_pipeline();
+    TaskDefinition build;
+    build.id = "build";
+    build.name = "build";
+    build.type = TaskType::kExecutable;
+    build.program = "/bin/echo";
+    build.outputs = {{"tool", "bin/tool", false}};
+
+    TaskDefinition use;
+    use.id = "use";
+    use.name = "use";
+    use.type = TaskType::kExecutable;
+    use.program = "bin/tool";
+
+    p.tasks = {build, use};  // no edge between them
+
+    ValidationOptions opts;
+    opts.check_executables = true;
+    const auto report = validate_pipeline(p, opts);
+    EXPECT_FALSE(report.ok());
+}
+
 TEST(Validation, RejectsZeroCpuRequest) {
     auto p = base_pipeline();
     auto t = exec_task("a");

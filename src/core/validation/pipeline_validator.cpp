@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -150,6 +151,7 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
     }
 
     // --- graph structure via the DAG builder ---
+    std::optional<dag::Dag> graph;
     {
         std::vector<std::string> nodes;
         nodes.reserve(pipeline.tasks.size());
@@ -164,7 +166,9 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
             edges.emplace_back(e.from, e.to);
         }
         auto built = dag::Dag::build(std::move(nodes), edges);
-        if (!built.ok()) {
+        if (built.ok()) {
+            graph = std::move(*built.dag);
+        } else {
             for (const auto& de : built.errors) {
                 sink.error("", "dependencies", de.message);
             }
@@ -179,6 +183,47 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
     for (const auto& e : pipeline.edges) {
         non_root.insert(e.to);
     }
+
+    // Files that some task promises to produce, mapped to the producing task.
+    // Lets a task reference an interpreter / executable / script that an
+    // upstream task builds (e.g. a compile step that emits bin/tool).
+    std::unordered_map<std::string, std::string> produced_by;
+    for (const auto& t : pipeline.tasks) {
+        for (const auto& decl : t.outputs) {
+            if (!decl.path.empty()) {
+                produced_by
+                    [artifacts.resolve_artifact_path(t, decl).lexically_normal().string()] =
+                        t.id;
+            }
+        }
+    }
+    auto candidate_path = [](const std::string& program,
+                             const fs::path& work_dir) -> std::optional<fs::path> {
+        if (program.find('/') == std::string::npos) {
+            return std::nullopt;  // a bare PATH name is never a pipeline output
+        }
+        const fs::path p(program);
+        return p.is_absolute() ? p : (work_dir / p).lexically_normal();
+    };
+    auto produced_upstream = [&](const domain::TaskDefinition& consumer,
+                                 const std::optional<fs::path>& path) -> bool {
+        if (!path) {
+            return false;
+        }
+        const auto it = produced_by.find(path->lexically_normal().string());
+        if (it == produced_by.end() || it->second == consumer.id) {
+            return false;
+        }
+        if (!graph) {
+            return true;  // graph did not build; be lenient rather than noisy
+        }
+        for (const auto& d : graph->transitive_dependents(it->second)) {
+            if (d == consumer.id) {
+                return true;
+            }
+        }
+        return false;
+    };
 
     for (const auto& task : pipeline.tasks) {
         if (task.id.empty()) {
@@ -202,7 +247,8 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
             }
             if (task.program.empty()) {
                 sink.error(task.id, "interpreter", "python task has no interpreter");
-            } else if (options.check_executables && !resolve_program(task.program, work_dir)) {
+            } else if (options.check_executables && !resolve_program(task.program, work_dir) &&
+                       !produced_upstream(task, candidate_path(task.program, work_dir))) {
                 sink.error(task.id, "interpreter",
                            "Python interpreter not found: " + task.program);
             }
@@ -211,7 +257,8 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
                                                  ? fs::path(task.script)
                                                  : (work_dir / task.script).lexically_normal();
                 std::error_code ec;
-                if (options.check_executables && !fs::is_regular_file(script_path, ec)) {
+                if (options.check_executables && !fs::is_regular_file(script_path, ec) &&
+                    !produced_upstream(task, script_path)) {
                     sink.error(task.id, "script",
                                "script file not found: " + script_path.string());
                 }
@@ -219,7 +266,8 @@ ValidationReport validate_pipeline(const PipelineDefinition& pipeline,
         } else {
             if (task.program.empty()) {
                 sink.error(task.id, "executable", "executable task has no executable");
-            } else if (options.check_executables && !resolve_program(task.program, work_dir)) {
+            } else if (options.check_executables && !resolve_program(task.program, work_dir) &&
+                       !produced_upstream(task, candidate_path(task.program, work_dir))) {
                 sink.error(task.id, "executable",
                            "executable not found or not runnable: " + task.program);
             }

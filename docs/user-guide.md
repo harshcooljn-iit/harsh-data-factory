@@ -8,12 +8,13 @@ JSON, run it, and inspect the results. For the exhaustive field reference see
 - [1. Install on macOS](#1-install-on-macos)
 - [2. First run in 60 seconds](#2-first-run-in-60-seconds)
 - [3. The pipeline JSON file](#3-the-pipeline-json-file)
-- [4. Running a pipeline](#4-running-a-pipeline)
-- [5. Inspecting runs](#5-inspecting-runs)
-- [6. Recipes](#6-recipes)
-- [7. Configuration](#7-configuration)
-- [8. Command reference](#8-command-reference)
-- [9. Troubleshooting](#9-troubleshooting)
+- [4. Worked example: a data project](#4-worked-example-a-data-project)
+- [5. Running a pipeline](#5-running-a-pipeline)
+- [6. Inspecting runs](#6-inspecting-runs)
+- [7. Recipes](#7-recipes)
+- [8. Configuration](#8-configuration)
+- [9. Command reference](#9-command-reference)
+- [10. Troubleshooting](#10-troubleshooting)
 
 ---
 
@@ -92,8 +93,49 @@ The rest of this guide assumes `flowforge` is on your `PATH`. If it isn't, use
 ### 1.5 Run the test suite (optional, to confirm the build)
 
 ```sh
-ctest --preset release            # ~20 s, 140 tests
+ctest --preset release            # ~20 s, 140+ tests
 ```
+
+### 1.6 Where FlowForge is installed, and how to remove it
+
+**FlowForge is not a system service and it does not touch anything outside the
+places you point it at.** There are three kinds of files:
+
+| What | Where | Global? |
+| --- | --- | --- |
+| The `flowforge` **binary** | wherever you built or installed it. If you ran `cmake --install ... --prefix /usr/local` it's `/usr/local/bin/flowforge` (global). If you used `--prefix "$HOME/.local"` it's `~/.local/bin/flowforge` (just your user). If you didn't install, it's only `build/<preset>/bin/flowforge` inside the repo. | Only if you chose a global prefix. |
+| The engine **library + headers** | alongside the binary under the same prefix: `<prefix>/lib/libflowforge_core.a`, `<prefix>/include/flowforge/…`. | Same as above. |
+| Per-project **state** (run history, logs, cache) | a `.flowforge/` directory in whatever folder you run commands from (or the `--state-dir` you pass). Nothing is written to your home directory or `/etc` by default. | No — one per project. |
+
+FlowForge writes **no** dotfiles in `$HOME`, no `launchd` agent, no
+`/Library` entries, and no global config. `~/vcpkg` is the dependency manager
+*you* cloned, not part of FlowForge.
+
+**To uninstall completely:**
+
+```sh
+# 1. Remove the installed binary + library + headers (match the prefix you used)
+sudo rm -f  /usr/local/bin/flowforge
+sudo rm -rf /usr/local/include/flowforge
+sudo rm -f  /usr/local/lib/libflowforge_core.a
+#   ...or, for a --prefix "$HOME/.local" install:
+rm -f  "$HOME/.local/bin/flowforge"
+rm -rf "$HOME/.local/include/flowforge"
+rm -f  "$HOME/.local/lib/libflowforge_core.a"
+
+# 2. Delete the source tree and its build output
+rm -rf /path/to/flowforge
+
+# 3. Delete per-project state wherever you created it (loses run history + cache)
+rm -rf /path/to/your-project/.flowforge
+
+# 4. (optional) the line you added to ~/.zshrc
+#    export VCPKG_ROOT="$HOME/vcpkg"
+#    ...and, if you only cloned vcpkg for this:  rm -rf ~/vcpkg
+```
+
+If you installed with CMake you can also list exactly what it placed:
+`cat build/release/install_manifest.txt`, then delete those paths.
 
 ---
 
@@ -211,11 +253,11 @@ A pipeline is a single JSON object. Minimum viable file:
 | `working_directory` | all | The directory the task runs in. Relative paths resolve against the pipeline's **base directory** (the folder the JSON file is in). Default: the base directory itself. |
 | `inputs` | all | Files the task needs. Checked to exist **before** the task starts; a missing input fails the task (and is not retried). |
 | `outputs` | all | Files the task should produce. Verified to exist **after** a successful exit; a missing output fails the task. |
-| `retry` | all | `max_retries` extra attempts, with exponential backoff. See 6.1. |
-| `resources` | all | `cpu_cores` / `memory_mb` / `gpu_count` reserved while the task runs. See 6.3. |
+| `retry` | all | `max_retries` extra attempts, with exponential backoff. See 7.1. |
+| `resources` | all | `cpu_cores` / `memory_mb` / `gpu_count` reserved while the task runs. See 7.3. |
 | `timeout_ms` | all | Kill the task (SIGTERM then SIGKILL) if one attempt runs longer than this. |
 | `priority` | all | Higher numbers run first when several tasks are ready and slots are scarce. Default `0`. |
-| `cache` | all | If `true`, an unchanged task is served from cache. See 6.2. |
+| `cache` | all | If `true`, an unchanged task is served from cache. See 7.2. |
 | `depends_on` | all | Shorthand for dependency edges — `["prepare"]` means "run after `prepare`". |
 
 ### 3.3 How data flows
@@ -270,9 +312,352 @@ explicitly:
 
 ---
 
-## 4. Running a pipeline
+## 4. Worked example: a data project
 
-### 4.1 Validate first (no execution)
+A realistic layout: monthly CSVs in `data/`, a mix of Python and C++ code in
+`src/`. The pipeline merges the CSVs, cleans them, computes summary statistics
+with a **compiled C++ binary** (the pipeline builds it as its first step), and
+writes a report.
+
+### 4.1 The project
+
+```
+sales-pipeline/
+├── data/
+│   ├── january.csv
+│   └── february.csv
+├── src/
+│   ├── merge.py       # combine data/*.csv           -> work/combined.csv
+│   ├── clean.py       # drop rows with a bad amount  -> work/clean.csv
+│   ├── stats.cpp      # count / sum / min / max / mean -> work/stats.txt
+│   └── report.py      # clean.csv + stats.txt        -> out/report.txt
+└── pipeline.json
+```
+
+`data/january.csv` (note the blank row — `clean` will drop it):
+
+```
+region,amount
+north,1200
+south,900
+east,1500
+west,
+north,1100
+```
+
+`data/february.csv` (`south` has a non-numeric amount):
+
+```
+region,amount
+north,1300
+south,invalid
+east,1400
+west,1000
+```
+
+`src/merge.py`:
+
+```python
+#!/usr/bin/env python3
+"""Combine every CSV in data/ into one file, keeping a single header."""
+import csv, glob, sys
+from pathlib import Path
+
+def main() -> int:
+    out_path = sys.argv[1]
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    files = sorted(glob.glob("data/*.csv"))
+    if not files:
+        print("merge: no CSV files in data/", file=sys.stderr)
+        return 1
+    rows = 0
+    with open(out_path, "w", newline="", encoding="utf-8") as out:
+        writer = None
+        for path in files:
+            with open(path, newline="", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                header = next(reader)
+                if writer is None:
+                    writer = csv.writer(out)
+                    writer.writerow(header)
+                for row in reader:
+                    writer.writerow(row)
+                    rows += 1
+    print(f"merge: combined {len(files)} files, {rows} rows -> {out_path}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+`src/clean.py`:
+
+```python
+#!/usr/bin/env python3
+"""Drop rows whose amount is missing or non-numeric."""
+import csv, sys
+
+def main() -> int:
+    src, dst = sys.argv[1], sys.argv[2]
+    kept = dropped = 0
+    with open(src, newline="", encoding="utf-8") as fin, \
+         open(dst, "w", newline="", encoding="utf-8") as fout:
+        reader = csv.reader(fin)
+        writer = csv.writer(fout)
+        writer.writerow(next(reader))                       # header
+        for row in reader:
+            if len(row) != 2 or not row[1].strip().isdigit():
+                dropped += 1
+                continue
+            writer.writerow([row[0].strip(), row[1].strip()])
+            kept += 1
+    print(f"clean: kept {kept}, dropped {dropped}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+`src/stats.cpp`:
+
+```cpp
+// Reads a two-column CSV (region,amount); writes count/sum/min/max/mean.
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <string>
+
+int main(int argc, char** argv) {
+    if (argc != 3) {
+        std::cerr << "usage: stats <input.csv> <output.txt>\n";
+        return 2;
+    }
+    std::ifstream in(argv[1]);
+    if (!in) { std::cerr << "stats: cannot open " << argv[1] << "\n"; return 1; }
+
+    std::string line;
+    std::getline(in, line);                                 // header
+    long count = 0, sum = 0;
+    long lo = std::numeric_limits<long>::max();
+    long hi = std::numeric_limits<long>::min();
+    while (std::getline(in, line)) {
+        const auto comma = line.find(',');
+        if (comma == std::string::npos) continue;
+        const long v = std::stol(line.substr(comma + 1));
+        sum += v; ++count;
+        lo = std::min(lo, v); hi = std::max(hi, v);
+    }
+    std::ofstream out(argv[2]);
+    out << "count=" << count << "\nsum=" << sum << "\n";
+    if (count > 0)
+        out << "min=" << lo << "\nmax=" << hi << "\nmean="
+            << (static_cast<double>(sum) / static_cast<double>(count)) << "\n";
+    std::cout << "stats: " << count << " rows summarised\n";
+    return 0;
+}
+```
+
+`src/report.py`:
+
+```python
+#!/usr/bin/env python3
+"""Combine the cleaned data and the stats into a readable report."""
+import csv, sys
+from pathlib import Path
+
+def main() -> int:
+    clean_csv, stats_txt, out_txt = sys.argv[1], sys.argv[2], sys.argv[3]
+    Path(out_txt).parent.mkdir(parents=True, exist_ok=True)
+    by_region = {}
+    with open(clean_csv, newline="", encoding="utf-8") as f:
+        reader = csv.reader(f)
+        next(reader)
+        for region, amount in reader:
+            by_region[region] = by_region.get(region, 0) + int(amount)
+    with open(out_txt, "w", encoding="utf-8") as out:
+        out.write("SALES REPORT\n============\n\nBy region:\n")
+        for region in sorted(by_region):
+            out.write(f"  {region:6s} {by_region[region]}\n")
+        out.write("\nOverall:\n")
+        out.write(Path(stats_txt).read_text())
+    print(f"report: wrote {out_txt}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+### 4.2 The pipeline
+
+`pipeline.json` lives in the **project root**, so every relative path below is
+relative to `sales-pipeline/`. The `setup` task creates the output
+directories (FlowForge does not create them for you); `build_stats` compiles
+`src/stats.cpp` — and `stats` may reference `bin/stats` even though it does not
+exist yet, because an upstream task it depends on produces it.
+
+```json
+{
+  "schema_version": 1,
+  "name": "sales_report",
+  "description": "Merge monthly CSVs, clean them, compute stats with a native binary, build a report.",
+  "defaults": { "python_interpreter": "python3", "cache": true },
+  "tasks": [
+    {
+      "id": "setup", "name": "Create output directories",
+      "type": "executable", "executable": "/bin/mkdir",
+      "arguments": ["-p", "bin", "work", "out"],
+      "cache": false
+    },
+    {
+      "id": "build_stats", "name": "Compile src/stats.cpp",
+      "type": "executable", "executable": "/usr/bin/c++",
+      "arguments": ["-O2", "-std=c++17", "src/stats.cpp", "-o", "bin/stats"],
+      "inputs":  [{ "name": "source", "path": "src/stats.cpp" }],
+      "outputs": [{ "name": "binary", "path": "bin/stats" }],
+      "depends_on": ["setup"]
+    },
+    {
+      "id": "merge", "name": "Merge monthly CSVs",
+      "type": "python", "script": "src/merge.py",
+      "arguments": ["work/combined.csv"],
+      "inputs": [
+        { "name": "january",  "path": "data/january.csv" },
+        { "name": "february", "path": "data/february.csv" }
+      ],
+      "outputs": [{ "name": "combined", "path": "work/combined.csv" }],
+      "depends_on": ["setup"]
+    },
+    {
+      "id": "clean", "name": "Drop invalid rows",
+      "type": "python", "script": "src/clean.py",
+      "arguments": ["work/combined.csv", "work/clean.csv"],
+      "inputs":  [{ "name": "combined", "path": "work/combined.csv" }],
+      "outputs": [{ "name": "clean",    "path": "work/clean.csv" }],
+      "depends_on": ["merge"]
+    },
+    {
+      "id": "stats", "name": "Summary statistics (native)",
+      "type": "executable", "executable": "bin/stats",
+      "arguments": ["work/clean.csv", "work/stats.txt"],
+      "inputs":  [{ "name": "clean", "path": "work/clean.csv" }],
+      "outputs": [{ "name": "stats", "path": "work/stats.txt" }],
+      "depends_on": ["clean", "build_stats"]
+    },
+    {
+      "id": "report", "name": "Build the report",
+      "type": "python", "script": "src/report.py",
+      "arguments": ["work/clean.csv", "work/stats.txt", "out/report.txt"],
+      "inputs": [
+        { "name": "clean", "path": "work/clean.csv" },
+        { "name": "stats", "path": "work/stats.txt" }
+      ],
+      "outputs": [{ "name": "report", "path": "out/report.txt" }],
+      "depends_on": ["clean", "stats"]
+    }
+  ],
+  "dependencies": []
+}
+```
+
+### 4.3 Run it
+
+From the project root:
+
+```sh
+cd sales-pipeline
+
+flowforge validate pipeline.json
+#  ok: 'sales_report' is valid (6 tasks, 7 dependencies)
+
+flowforge graph pipeline.json
+```
+
+```
+Levels (tasks on the same level have no ordering constraint):
+  0  setup
+  1  build_stats, merge
+  2  clean
+  3  stats
+  4  report
+```
+
+```sh
+flowforge run pipeline.json --max-concurrency 3
+```
+
+```
+[SUCCESS ] setup  0.00s
+[SUCCESS ] merge  0.10s          build_stats + merge ran together
+[SUCCESS ] clean  0.02s
+[SUCCESS ] build_stats  0.79s
+[SUCCESS ] stats  0.87s
+[SUCCESS ] report  0.08s
+
+Pipeline SUCCEEDED in 1.75s
+  6 succeeded, 0 cached, 0 failed, 0 skipped, 0 cancelled  (of 6)
+run id: 1
+
+$ cat out/report.txt
+SALES REPORT
+============
+
+By region:
+  east   2900
+  north  3600
+  south  900
+  west   1000
+
+Overall:
+count=7
+sum=8400
+min=900
+max=1500
+mean=1200
+```
+
+(The two dropped rows — `west` with a blank amount and `south,invalid` — are
+why `count` is 7, not 9.)
+
+### 4.4 Re-run and change an input
+
+Run it again — nothing changed, so everything is served from cache
+(`setup` has `"cache": false`, so it always runs):
+
+```sh
+flowforge run pipeline.json
+#  [SUCCESS ] setup   0.00s
+#  [CACHED  ] build_stats
+#  [CACHED  ] merge
+#  [CACHED  ] clean
+#  [CACHED  ] stats
+#  [CACHED  ] report
+#  Pipeline SUCCEEDED in 0.01s
+#    1 succeeded, 5 cached, 0 failed, ...
+```
+
+Now edit a CSV and re-run:
+
+```sh
+echo "central,2000" >> data/january.csv
+flowforge run pipeline.json
+```
+
+`build_stats` stays `CACHED` (its input `src/stats.cpp` is untouched), but
+`merge → clean → stats → report` all re-execute because the changed
+`data/january.csv` flows down the chain and changes each cache key.
+
+```sh
+flowforge runs
+flowforge status 3
+flowforge logs 3 --task clean
+```
+
+---
+
+## 5. Running a pipeline
+
+### 5.1 Validate first (no execution)
 
 ```sh
 flowforge validate pipeline.json
@@ -290,7 +675,7 @@ error: task 'train' [interpreter]: Python interpreter not found: /bad/python3
 Add `--strict` to also require that root-task input files already exist and to
 treat warnings as failures.
 
-### 4.2 See the shape of the graph
+### 5.2 See the shape of the graph
 
 ```sh
 flowforge graph pipeline.json
@@ -312,7 +697,7 @@ prepare
     `-- train *
 ```
 
-### 4.3 Run it
+### 5.3 Run it
 
 ```sh
 flowforge run pipeline.json
@@ -336,7 +721,7 @@ error. So you can do:
 flowforge run pipeline.json && echo "ok" || echo "pipeline failed"
 ```
 
-### 4.4 Stopping a run
+### 5.4 Stopping a run
 
 - Press **Ctrl-C** in the terminal running `flowforge run`. Running tasks get
   SIGTERM, then SIGKILL after a short grace period; pending tasks are
@@ -351,7 +736,7 @@ flowforge run pipeline.json && echo "ok" || echo "pipeline failed"
 
 ---
 
-## 5. Inspecting runs
+## 6. Inspecting runs
 
 Everything is stored in `.flowforge/flowforge.sqlite` and survives across
 invocations.
@@ -396,9 +781,9 @@ sqlite3 .flowforge/flowforge.sqlite \
 
 ---
 
-## 6. Recipes
+## 7. Recipes
 
-### 6.1 Retry a flaky task
+### 7.1 Retry a flaky task
 
 ```json
 {
@@ -414,7 +799,7 @@ before 4 is 8 s (capped at `max_delay_ms`). Every attempt is recorded — see
 `flowforge status`. Deterministic errors (interpreter missing, declared input
 missing) are **never** retried regardless of this policy.
 
-### 6.2 Skip work that hasn't changed (caching)
+### 7.2 Skip work that hasn't changed (caching)
 
 Give the task `"cache": true` and declare its `inputs` and `outputs`:
 
@@ -448,7 +833,7 @@ The cache key covers task type, program, script, arguments, environment,
 working directory and input identity. It deliberately ignores `name`,
 `priority`, `retry` and `resources`.
 
-### 6.3 Limit resource usage
+### 7.3 Limit resource usage
 
 ```json
 "defaults": { "resources": { "cpu_cores": 1 } },
@@ -464,7 +849,7 @@ reservation. This is separate from `--max-concurrency` (both gates apply).
 `cpu_cores` is a declared weight for scheduling, not a hard CPU limit; GPUs are
 counted but not device-managed.
 
-### 6.4 Fan out and join
+### 7.4 Fan out and join
 
 ```json
 "tasks": [
@@ -480,14 +865,14 @@ counted but not device-managed.
 
 Run with `--max-concurrency 3` to overlap the shards.
 
-### 6.5 What happens when a task fails
+### 7.5 What happens when a task fails
 
 Failure is **branch-local**. If `shard_2` fails and retries are exhausted:
 `shard_2 → FAILED`, `merge → SKIPPED` (a dependency didn't succeed), but
 `shard_1` and `shard_3` still run to completion. The run ends `FAILED`.
 Unrelated branches are never cancelled just because one branch failed.
 
-### 6.6 Python tasks
+### 7.6 Python tasks
 
 ```json
 {
@@ -507,7 +892,7 @@ Unrelated branches are never cancelled just because one branch failed.
 bare `python` exists — name `python3` (or an absolute path, or a virtualenv's
 `bin/python`).
 
-### 6.7 CI usage
+### 7.7 CI usage
 
 ```sh
 flowforge run pipeline.json --plain --no-cache
@@ -521,7 +906,7 @@ signal.
 
 ---
 
-## 7. Configuration
+## 8. Configuration
 
 Settings are resolved lowest-precedence first:
 
@@ -560,7 +945,7 @@ flowforge runs               --state-dir .flowforge-experiments
 
 ---
 
-## 8. Command reference
+## 9. Command reference
 
 ```
 flowforge init                         scaffold .flowforge/ and a sample pipeline.json
@@ -590,7 +975,7 @@ exit codes:  0 success   1 reported failure   2 usage error
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Symptom | Cause / fix |
 | --- | --- |
