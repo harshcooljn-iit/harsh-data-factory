@@ -1,0 +1,5 @@
+count=7
+sum=8400
+min=900
+max=1500
+mean=1200

@@ -1,0 +1,10 @@
+region,amount
+north,1300
+south,invalid
+east,1400
+west,1000
+north,1200
+south,900
+east,1500
+west,
+north,1100
